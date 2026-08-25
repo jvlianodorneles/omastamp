@@ -175,23 +175,11 @@ Panel {
     return false
   }
 
-  readonly property string pickScriptPath: Qt.resolvedUrl("scripts/pick-image.sh").toString().replace(/^file:\/\//, "")
+  readonly property string browseScriptPath: Qt.resolvedUrl("scripts/browse-image.sh").toString().replace(/^file:\/\//, "")
 
-  // File Picker Subprocess for Custom Image
-  Process {
-    id: filePickerProc
-    running: false
-    command: ["bash", root.pickScriptPath]
-    stdout: StdioCollector {
-      onStreamFinished: {
-        var chosen = String(text || "").trim()
-        if (chosen.length > 0) {
-          root.customImagePath = chosen
-          root.mode = "image"
-          root.saveConfig()
-        }
-      }
-    }
+  function browseImage() {
+    root.close()
+    Quickshell.execDetached(["bash", root.browseScriptPath])
   }
 
   KeyboardPanel {
@@ -402,9 +390,7 @@ Panel {
             Button {
               text: "Browse..."
               bordered: true
-              onClicked: {
-                if (!filePickerProc.running) filePickerProc.running = true
-              }
+              onClicked: root.browseImage()
             }
           }
 
