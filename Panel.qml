@@ -175,11 +175,13 @@ Panel {
     return false
   }
 
+  readonly property string pickScriptPath: Qt.resolvedUrl("scripts/pick-image.sh").toString().replace(/^file:\/\//, "")
+
   // File Picker Subprocess for Custom Image
   Process {
     id: filePickerProc
     running: false
-    command: ["zenity", "--file-selection", "--title=Select Logo / Watermark Image", "--file-filter=Images (*.png *.svg *.jpg *.webp) | *.png *.svg *.jpg *.jpeg *.webp"]
+    command: ["bash", root.pickScriptPath]
     stdout: StdioCollector {
       onStreamFinished: {
         var chosen = String(text || "").trim()
