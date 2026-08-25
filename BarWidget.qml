@@ -18,6 +18,7 @@ BarWidget {
   property string currentPreset: "omarchy"
 
   readonly property bool opened: panelLoader.item ? panelLoader.item.opened === true : false
+  readonly property bool popoutSwitchClosing: panelLoader.item ? panelLoader.item.popoutSwitchClosing === true : false
 
   FileView {
     id: configFile
@@ -76,12 +77,12 @@ BarWidget {
     if (panelLoader.item) panelLoader.item.close()
   }
 
+  function closeForPopoutSwitch() {
+    if (panelLoader.item) panelLoader.item.closeForPopoutSwitch()
+  }
+
   function togglePanel() {
-    if (root.opened) {
-      root.close()
-    } else {
-      root.open()
-    }
+    if (panelLoader.item) panelLoader.item.toggle()
   }
 
   function injectPanel() {
@@ -122,16 +123,16 @@ BarWidget {
     function cycle(): void { root.cyclePreset() }
   }
 
-  // Status Bar Button with Stamp icon (󰹢 nf-md-stamper / watermark)
+  // Status Bar Button with Stamp icon (\udb83\ude62 = 󰹢)
   WidgetButton {
     id: button
     anchors.fill: parent
     bar: root.bar
-    text: (root.showLabelSetting && button.bar && !button.bar.vertical) ? "󰹢 Stamp" : "󰹢"
+    text: (root.showLabelSetting && button.bar && !button.bar.vertical) ? "\udb83\ude62 Stamp" : "\udb83\ude62"
     active: root.opened
     fontSize: Style.bar.iconFont
     dimmed: !root.stampEnabled
-    tooltipText: "OmaStamp (Desktop Logo Overlay)\n• Click: Open Studio Panel\n• Right-click: Toggle On/Off\n• Middle-click: Cycle Logo Preset"
+    tooltipText: "OmaStamp (Desktop Logo Overlay)\n• Left-click: Open Studio\n• Right-click: Toggle On/Off\n• Middle-click: Cycle Logo"
 
     onPressed: function(btn) {
       if (btn === Qt.RightButton) {

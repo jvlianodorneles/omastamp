@@ -257,7 +257,6 @@ Panel {
 
         PanelSeparator {
           Layout.fillWidth: true
-          bar: root.bar
         }
 
         // -------------------------------------------------------------
@@ -825,7 +824,6 @@ Panel {
 
         PanelSeparator {
           Layout.fillWidth: true
-          bar: root.bar
         }
 
         // -------------------------------------------------------------
