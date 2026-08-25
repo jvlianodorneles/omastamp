@@ -175,11 +175,9 @@ Panel {
     return false
   }
 
-  readonly property string browseScriptPath: Qt.resolvedUrl("scripts/browse-image.sh").toString().replace(/^file:\/\//, "")
-
   function browseImage() {
     root.close()
-    Quickshell.execDetached(["bash", root.browseScriptPath])
+    Quickshell.execDetached(["omastamp", "browse"])
   }
 
   KeyboardPanel {

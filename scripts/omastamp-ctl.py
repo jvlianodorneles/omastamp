@@ -7,6 +7,8 @@ Manages desktop logo overlay configuration, presets, and state persistence.
 import sys
 import os
 import json
+import shutil
+import subprocess
 import argparse
 from pathlib import Path
 
@@ -92,6 +94,62 @@ def save_config(cfg: dict):
     tmp.replace(CONFIG_FILE)
 
 
+def browse_image():
+    chosen = None
+    # 1. Tkinter File Dialog
+    try:
+        import tkinter as tk
+        from tkinter import filedialog
+        root = tk.Tk()
+        root.withdraw()
+        root.attributes("-topmost", True)
+        initial = os.path.expanduser("~/Pictures")
+        if not os.path.isdir(initial):
+            initial = os.path.expanduser("~")
+        chosen = filedialog.askopenfilename(
+            title="Select Logo / Watermark Image (OmaStamp)",
+            initialdir=initial,
+            filetypes=[
+                ("Image Files", "*.png *.svg *.jpg *.jpeg *.webp *.gif *.bmp"),
+                ("SVG Vector", "*.svg"),
+                ("PNG Images", "*.png"),
+                ("JPEG Images", "*.jpg *.jpeg"),
+                ("WebP Images", "*.webp"),
+                ("All Files", "*.*")
+            ]
+        )
+    except Exception:
+        pass
+
+    # 2. Zenity / Kdialog fallback
+    if not chosen:
+        if shutil.which("zenity"):
+            try:
+                res = subprocess.run(["zenity", "--file-selection", "--title=Select Logo / Watermark Image"], capture_output=True, text=True)
+                if res.returncode == 0 and res.stdout.strip():
+                    chosen = res.stdout.strip()
+            except Exception:
+                pass
+        elif shutil.which("kdialog"):
+            try:
+                res = subprocess.run(["kdialog", "--getopenfilename", os.path.expanduser("~/Pictures")], capture_output=True, text=True)
+                if res.returncode == 0 and res.stdout.strip():
+                    chosen = res.stdout.strip()
+            except Exception:
+                pass
+
+    if chosen and os.path.isfile(chosen):
+        chosen_path = str(Path(chosen).resolve())
+        cfg = load_config()
+        cfg["mode"] = "image"
+        cfg["customImagePath"] = chosen_path
+        cfg["enabled"] = True
+        save_config(cfg)
+        print(f"✓ Selected custom image: {chosen_path}")
+        return chosen_path
+    return None
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog="omastamp",
@@ -121,6 +179,9 @@ def main():
     # custom image
     p_img = subparsers.add_parser("set-image", help="Set custom image file path")
     p_img.add_argument("path", help="Path to image or SVG file")
+
+    subparsers.add_parser("browse", help="Open graphical file dialog to select image")
+    subparsers.add_parser("pick", help="Open graphical file dialog to select image")
 
     # custom text
     p_txt = subparsers.add_parser("set-text", help="Set custom text / monogram")
@@ -173,6 +234,10 @@ def main():
 
     if args.command == "get":
         print(json.dumps(cfg, indent=2))
+        return
+
+    if args.command in ("browse", "pick"):
+        browse_image()
         return
 
     if args.command == "status":
