@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" fill="none" stroke="currentColor" stroke-width="8">
+  <!-- Retro 80s Cyber Wireframe Globe -->
+  <circle cx="150" cy="150" r="120" stroke-width="12"/>
+  <ellipse cx="150" cy="150" rx="120" ry="40" stroke-width="8"/>
+  <ellipse cx="150" cy="150" rx="120" ry="85" stroke-width="8"/>
+  <ellipse cx="150" cy="150" rx="40" ry="120" stroke-width="8"/>
+  <ellipse cx="150" cy="150" rx="85" ry="120" stroke-width="8"/>
+  <line x1="150" y1="30" x2="150" y2="270" stroke-width="10"/>
+  <line x1="30" y1="150" x2="270" y2="150" stroke-width="10"/>
+</svg>

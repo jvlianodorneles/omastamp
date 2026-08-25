@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" fill="currentColor">
+  <!-- Retro Pixel Arcade Ghost -->
+  <path fill-rule="evenodd" clip-rule="evenodd" d="
+    M 90,30 H 210 V 50 H 240 V 80 H 260 V 130 H 270 V 250 H 240 V 220 H 210 V 250 H 180 V 220 H 150 V 220 H 120 V 250 H 90 V 220 H 60 V 250 H 30 V 130 H 40 V 80 H 60 V 50 H 90 Z
+    M 80,100 H 110 V 140 H 80 Z
+    M 170,100 H 200 V 140 H 170 Z
+    M 100,110 H 120 V 130 H 100 Z
+    M 190,110 H 210 V 130 H 190 Z
+  "/>
+</svg>

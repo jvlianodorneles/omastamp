@@ -1,0 +1,217 @@
+{
+  "schemaVersion": 1,
+  "id": "dorneles.omastamp",
+  "name": "OmaStamp",
+  "version": "1.0.0",
+  "author": "Dorneles",
+  "license": "MIT",
+  "description": "Overlay and stamp custom logos, vector crests, and typographic watermarks directly over the desktop background wallpaper.",
+  "keywords": [
+    "stamp",
+    "logo",
+    "watermark",
+    "background",
+    "wallpaper",
+    "branding",
+    "overlay",
+    "quickshell"
+  ],
+  "kinds": [
+    "bar-widget",
+    "overlay"
+  ],
+  "keepLoaded": true,
+  "entryPoints": {
+    "barWidget": "BarWidget.qml",
+    "overlay": "Overlay.qml"
+  },
+  "barWidget": {
+    "displayName": "OmaStamp",
+    "description": "Desktop background logo and watermark stamp studio",
+    "category": "Customization",
+    "allowMultiple": false,
+    "defaultSection": "right",
+    "defaults": {
+      "enabled": true,
+      "mode": "preset",
+      "preset": "omarchy",
+      "position": "center",
+      "size": 280,
+      "opacity": 30,
+      "tintMode": "theme-accent",
+      "customColor": "#ffffff",
+      "offsetX": 0,
+      "offsetY": 0,
+      "margin": 48,
+      "rotation": 0,
+      "showShadow": false,
+      "customImagePath": "",
+      "customText": "OMARCHY",
+      "customSubtext": "",
+      "primaryScreenOnly": false,
+      "showLabel": true
+    },
+    "schema": [
+      {
+        "key": "enabled",
+        "type": "boolean",
+        "label": "Enable Stamp Overlay",
+        "defaultValue": true,
+        "description": "Show or hide the desktop logo overlay."
+      },
+      {
+        "key": "mode",
+        "type": "enum",
+        "label": "Stamp Mode",
+        "options": [
+          "preset",
+          "image",
+          "text"
+        ],
+        "defaultValue": "preset",
+        "description": "Source of the stamp: built-in preset vector, custom image file, or text monogram."
+      },
+      {
+        "key": "preset",
+        "type": "enum",
+        "label": "Preset Logo",
+        "options": [
+          "omarchy",
+          "omarchy-text",
+          "arch",
+          "hyprland",
+          "tux",
+          "cyber-hex",
+          "retro-globe",
+          "arcade-ghost",
+          "terminal",
+          "minimal-star"
+        ],
+        "defaultValue": "omarchy",
+        "description": "Select from bundled high-resolution vector insignia."
+      },
+      {
+        "key": "position",
+        "type": "enum",
+        "label": "Screen Position",
+        "options": [
+          "center",
+          "top-left",
+          "top-center",
+          "top-right",
+          "center-left",
+          "center-right",
+          "bottom-left",
+          "bottom-center",
+          "bottom-right"
+        ],
+        "defaultValue": "center",
+        "description": "Anchor placement on the desktop screen."
+      },
+      {
+        "key": "size",
+        "type": "integer",
+        "label": "Logo Size (px)",
+        "min": 32,
+        "max": 800,
+        "step": 8,
+        "defaultValue": 280,
+        "description": "Size in pixels of the rendered stamp."
+      },
+      {
+        "key": "opacity",
+        "type": "integer",
+        "label": "Opacity Percentage (0-100%)",
+        "min": 1,
+        "max": 100,
+        "step": 5,
+        "defaultValue": 30,
+        "description": "Watermark transparency level on the background."
+      },
+      {
+        "key": "tintMode",
+        "type": "enum",
+        "label": "Color Tint Mode",
+        "options": [
+          "theme-accent",
+          "theme-fg",
+          "original",
+          "white",
+          "black",
+          "custom"
+        ],
+        "defaultValue": "theme-accent",
+        "description": "How the stamp should be colored: follow dynamic theme accent, text color, original colors, or custom."
+      },
+      {
+        "key": "customColor",
+        "type": "string",
+        "label": "Custom Hex Color",
+        "defaultValue": "#ffffff",
+        "description": "Custom color when tintMode is set to 'custom'."
+      },
+      {
+        "key": "rotation",
+        "type": "integer",
+        "label": "Rotation Angle (Degrees)",
+        "min": -180,
+        "max": 180,
+        "step": 5,
+        "defaultValue": 0,
+        "description": "Angle to rotate the logo (e.g. -15° or 45° for slanted watermark)."
+      },
+      {
+        "key": "margin",
+        "type": "integer",
+        "label": "Edge Margin / Padding (px)",
+        "min": 0,
+        "max": 300,
+        "step": 4,
+        "defaultValue": 48,
+        "description": "Distance in pixels from the screen edges."
+      },
+      {
+        "key": "showShadow",
+        "type": "boolean",
+        "label": "Subtle Drop Shadow",
+        "defaultValue": false,
+        "description": "Add subtle depth shadow behind the logo."
+      },
+      {
+        "key": "customImagePath",
+        "type": "string",
+        "label": "Custom Image Path",
+        "defaultValue": "",
+        "description": "Absolute path to custom SVG, PNG, JPG or WebP file."
+      },
+      {
+        "key": "customText",
+        "type": "string",
+        "label": "Watermark Text",
+        "defaultValue": "OMARCHY",
+        "description": "Text displayed when mode is set to 'text'."
+      },
+      {
+        "key": "customSubtext",
+        "type": "string",
+        "label": "Watermark Subtext",
+        "defaultValue": "",
+        "description": "Optional secondary tagline displayed underneath text."
+      },
+      {
+        "key": "primaryScreenOnly",
+        "type": "boolean",
+        "label": "Primary Screen Only",
+        "defaultValue": false,
+        "description": "Show stamp only on the main display instead of all connected monitors."
+      },
+      {
+        "key": "showLabel",
+        "type": "boolean",
+        "label": "Show Label on Top Bar",
+        "defaultValue": true,
+        "description": "Display 'OmaStamp' text next to the icon on the status bar."
+      }
+    ]
+  }
+}

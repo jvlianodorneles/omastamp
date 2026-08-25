@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# OmaStamp CLI Helper
+# Desktop Logo & Watermark Overlay Controller
+# ==============================================================================
+
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SCRIPT="${DIR}/scripts/omastamp-ctl.py"
+
+if [ -f "${SCRIPT}" ]; then
+  exec python3 "${SCRIPT}" "$@"
+elif [ -f "${HOME}/.config/omarchy/plugins/dorneles.omastamp/scripts/omastamp-ctl.py" ]; then
+  exec python3 "${HOME}/.config/omarchy/plugins/dorneles.omastamp/scripts/omastamp-ctl.py" "$@"
+else
+  echo "Error: omastamp-ctl.py not found" >&2
+  exit 1
+fi
