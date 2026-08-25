@@ -121,7 +121,20 @@ def browse_image():
     except Exception:
         pass
 
-    # 2. Zenity / Kdialog fallback
+    # 2. Omarchy Menu File Fallback
+    if not chosen and shutil.which("omarchy-menu-file"):
+        try:
+            search_dirs = [d for d in [os.path.expanduser("~/Pictures"), os.path.expanduser("~/Downloads"), os.path.expanduser("~/.config/omarchy")] if os.path.isdir(d)]
+            if not search_dirs:
+                search_dirs = [os.path.expanduser("~")]
+            dirs_str = ":".join(search_dirs)
+            res = subprocess.run(["omarchy-menu-file", "Select Logo / Watermark Image", dirs_str, "png svg jpg jpeg webp"], capture_output=True, text=True)
+            if res.returncode == 0 and res.stdout.strip():
+                chosen = res.stdout.strip()
+        except Exception:
+            pass
+
+    # 3. Zenity / Kdialog fallback
     if not chosen:
         if shutil.which("zenity"):
             try:

@@ -313,7 +313,7 @@ Item {
             id: customImage
             anchors.fill: parent
             visible: root.mode === "image" && root.customImagePath !== ""
-            source: (root.mode === "image" && root.customImagePath) ? Util.fileUrl(root.customImagePath) : ""
+            source: (root.mode === "image" && root.customImagePath && (root.customImagePath.indexOf("/") === 0 || root.customImagePath.indexOf("file://") === 0)) ? Util.fileUrl(root.customImagePath) : ""
             sourceSize.width: root.stampSize
             sourceSize.height: root.stampSize
             fillMode: Image.PreserveAspectFit

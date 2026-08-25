@@ -177,7 +177,7 @@ Panel {
 
   function browseImage() {
     root.close()
-    Quickshell.execDetached(["omastamp", "browse"])
+    Util.execDetached("omastamp browse")
   }
 
   KeyboardPanel {
@@ -406,7 +406,7 @@ Panel {
               height: Style.space(48)
               width: Style.space(80)
               fillMode: Image.PreserveAspectFit
-              source: root.customImagePath ? Util.fileUrl(root.customImagePath) : ""
+              source: (root.customImagePath && (root.customImagePath.indexOf("/") === 0 || root.customImagePath.indexOf("file://") === 0)) ? Util.fileUrl(root.customImagePath) : ""
               visible: root.customImagePath !== ""
               layer.enabled: root.tintMode !== "original"
               layer.effect: MultiEffect {
