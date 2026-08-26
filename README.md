@@ -6,16 +6,16 @@
 [![Omarchy](https://img.shields.io/badge/Omarchy-Quattro-blue.svg)](https://omarchy.org)
 [![Platform](https://img.shields.io/badge/Platform-Linux%20%2F%20Wayland%20%2F%20Hyprland-informational.svg)]()
 
-**OmaStamp** stamps clean, customizable logos, distro crests, vector insignias, or typographic monograms directly over your desktop wallpaper. It runs seamlessly behind all application windows on Wayland LayerShell (`WlrLayer.Bottom`), completely transparent to mouse clicks (`mask: Region {}`).
+**OmaStamp** stamps clean, customizable logos, distro crests, vector insignias, and typographic or ASCII art watermarks directly over your desktop wallpaper. It runs seamlessly behind all application windows on Wayland LayerShell (`WlrLayer.Bottom`), completely transparent to mouse clicks (`mask: Region {}`).
 
 ---
 
 ## ✨ Features
 
 - 🖼️ **3 Powerful Overlay Modes**:
-  - **Preset Vector Crests**: Bundled high-resolution SVG insignias (*Omarchy*, *Arch Linux*, *Hyprland*, *Tux Linux*, *Cyber Hex*, *Retro 80s Globe*, *Arcade Ghost*, *Terminal Badge*, *Minimal Star*).
-  - **Custom Image / Logo File**: Stamp any custom PNG, SVG, JPG, or WebP logo with integrated file browsing.
-  - **Typographic Watermark**: Custom text monogram + secondary slogan/system specs with uppercase letter-spacing.
+  - **Preset Vector Crests**: Bundled high-resolution SVG insignias (*Omarchy Mark*, *Omarchy Wordmark*, *Arch Linux*, *Hyprland*, *Tux Linux*, *Cyber Hex*, *Retro 80s Globe*, *Arcade Ghost*, *Terminal Badge*, *Minimal Star*).
+  - **Custom Image / Logo File**: Stamp any custom PNG, SVG, JPG, or WebP logo with integrated desktop file browsing.
+  - **Watermark Text & ASCII Art**: Custom wordmark text with support for 20 typography and ASCII art fonts (*Slant*, *Block*, *Doom*, *Banner*, *Star Wars*, *Cyberlarge*, *Delta Corps*, etc.) with real-time auto-scaling preview.
 - 🎯 **9-Point Interactive Placement Matrix**:
   - Center, Top-Left, Top-Center, Top-Right, Center-Left, Center-Right, Bottom-Left, Bottom-Center, Bottom-Right.
   - Fine-grained margin and offset sliders.
@@ -29,12 +29,14 @@
   - Size slider (32px to 800px).
   - Rotation angle slider (-180° to +180° with smooth animated transitions).
   - Optional subtle drop shadow effect.
+  - Primary display only toggle for multi-monitor setups.
 - 🖱️ **Zero-Interference Click-Through**:
   - Built with an empty Wayland input region (`mask: Region {}`), so desktop wallpaper double-clicks (wallpaper/theme switcher) and mouse actions pass straight through with zero lag or blocking.
 - 🖥️ **Status Bar Widget & Studio Popup**:
-  - Left-click status bar icon: Opens interactive **OmaStamp Studio** control popup.
-  - Right-click status bar icon: Instant on/off toggle.
-  - Middle-click status bar icon: Quick cycle to next logo preset.
+  - Clean **Postal Stamp vector icon** on the Omarchy status bar.
+  - Left-click: Opens interactive **OmaStamp Studio** control popup.
+  - Right-click: Instant on/off toggle.
+  - Middle-click: Quick cycle to next logo preset.
 - 💻 **Standalone CLI & IPC Controller (`omastamp`)**:
   - Control every aspect of the stamp from scripts, terminals, or Hyprland keybindings.
 
@@ -50,12 +52,17 @@ omastamp off
 
 # Switch logo presets
 omastamp list-presets
-omastamp set-preset arch
+omastamp set-preset omarchy
 omastamp next-preset
 
-# Custom image & text
+# Watermark text & fonts (Typography + ASCII Art)
+omastamp list-fonts
+omastamp set-text "OMARCHY" --font slant
+omastamp set-font block
+
+# Custom image
+omastamp browse
 omastamp set-image ~/Pictures/my-branding.svg
-omastamp set-text "OMARCHY" "ARCH LINUX EDITION"
 
 # Adjust alignment & dimensions
 omastamp set-position center
@@ -90,7 +97,8 @@ bind = SUPER CTRL, S, exec, omastamp next-preset
 ## 📦 Installation
 
 ```bash
-cd /home/dorneles/Projects/omastamp
+git clone https://github.com/jvlianodorneles/omastamp.git
+cd omastamp
 ./install.sh
 ```
 
