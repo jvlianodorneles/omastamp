@@ -150,7 +150,9 @@ def save_config(cfg: dict):
 
 def browse_image():
     chosen = None
-    # 1. Tkinter File Dialog
+    dialog_launched = False
+
+    # 1. Tkinter File Dialog (Desktop GUI File Selector)
     try:
         import tkinter as tk
         from tkinter import filedialog
@@ -172,11 +174,13 @@ def browse_image():
                 ("All Files", "*.*")
             ]
         )
+        dialog_launched = True
+        root.destroy()
     except Exception:
-        pass
+        dialog_launched = False
 
-    # 2. Omarchy Menu File Fallback
-    if not chosen and shutil.which("omarchy-menu-file"):
+    # 2. Omarchy Menu File Fallback (ONLY if Tkinter dialog failed to launch)
+    if not dialog_launched and shutil.which("omarchy-menu-file"):
         try:
             search_dirs = [d for d in [os.path.expanduser("~/Pictures"), os.path.expanduser("~/Downloads"), os.path.expanduser("~/.config/omarchy")] if os.path.isdir(d)]
             if not search_dirs:
@@ -185,16 +189,18 @@ def browse_image():
             res = subprocess.run(["omarchy-menu-file", "Select Logo / Watermark Image", dirs_str, "png svg jpg jpeg webp"], capture_output=True, text=True)
             if res.returncode == 0 and res.stdout.strip():
                 chosen = res.stdout.strip()
+            dialog_launched = True
         except Exception:
             pass
 
-    # 3. Zenity / Kdialog fallback
-    if not chosen:
+    # 3. Zenity / Kdialog fallback (ONLY if previous tools failed to launch)
+    if not dialog_launched:
         if shutil.which("zenity"):
             try:
                 res = subprocess.run(["zenity", "--file-selection", "--title=Select Logo / Watermark Image"], capture_output=True, text=True)
                 if res.returncode == 0 and res.stdout.strip():
                     chosen = res.stdout.strip()
+                dialog_launched = True
             except Exception:
                 pass
         elif shutil.which("kdialog"):
@@ -202,6 +208,7 @@ def browse_image():
                 res = subprocess.run(["kdialog", "--getopenfilename", os.path.expanduser("~/Pictures")], capture_output=True, text=True)
                 if res.returncode == 0 and res.stdout.strip():
                     chosen = res.stdout.strip()
+                dialog_launched = True
             except Exception:
                 pass
 
@@ -214,6 +221,7 @@ def browse_image():
         save_config(cfg)
         print(f"✓ Selected custom image: {chosen_path}")
         return chosen_path
+
     return None
 
 
