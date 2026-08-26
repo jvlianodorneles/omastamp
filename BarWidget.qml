@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
 import qs.Commons
@@ -9,7 +10,6 @@ BarWidget {
   id: root
   moduleName: "dorneles.omastamp"
 
-  readonly property bool showLabelSetting: setting("showLabel", true)
   readonly property string stateFilePath: Quickshell.env("HOME") + "/.local/state/omarchy/omastamp/config.json"
 
   // Live state
@@ -123,16 +123,39 @@ BarWidget {
     function cycle(): void { root.cyclePreset() }
   }
 
-  // Status Bar Button with Postal Stamp icon (\udb83\ude62 = 󰹢)
+  // Status Bar Button with Postal Stamp Vector Icon
   WidgetButton {
     id: button
     anchors.fill: parent
     bar: root.bar
-    text: "\udb83\ude62"
+    text: " "
+    labelVisible: false
+    hasVisualContent: true
     active: root.opened
-    fontSize: Style.bar.iconFont
     dimmed: !root.stampEnabled
     tooltipText: "OmaStamp (Desktop Logo Overlay)\n• Left-click: Open Studio\n• Right-click: Toggle On/Off\n• Middle-click: Cycle Logo"
+
+    Item {
+      anchors.centerIn: parent
+      width: Style.space(16)
+      height: Style.space(16)
+
+      Image {
+        id: stampIconImg
+        anchors.fill: parent
+        source: Qt.resolvedUrl("assets/icon.svg")
+        sourceSize: Qt.size(32, 32)
+        fillMode: Image.PreserveAspectFit
+        smooth: true
+        mipmap: true
+
+        layer.enabled: true
+        layer.effect: MultiEffect {
+          colorization: 1.0
+          colorizationColor: root.opened ? (button.useActiveColor ? button.activeColor : button.foreground) : (root.stampEnabled ? button.foreground : Util.alpha(button.foreground, 0.45))
+        }
+      }
+    }
 
     onPressed: function(btn) {
       if (btn === Qt.RightButton) {

@@ -255,11 +255,24 @@ Panel {
           fontFamily: root.fontFamily
 
           iconComponent: Component {
-            Text {
-              text: "\udb83\ude62"
-              font.family: root.fontFamily
-              font.pixelSize: Style.font.display
-              color: root.stampEnabled ? Color.accent : Qt.darker(Color.foreground, 1.4)
+            Item {
+              width: Style.space(26)
+              height: Style.space(26)
+
+              Image {
+                anchors.fill: parent
+                source: Qt.resolvedUrl("assets/icon.svg")
+                sourceSize: Qt.size(52, 52)
+                fillMode: Image.PreserveAspectFit
+                smooth: true
+                mipmap: true
+
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                  colorization: 1.0
+                  colorizationColor: root.stampEnabled ? Color.accent : Qt.darker(Color.foreground, 1.4)
+                }
+              }
             }
           }
 
