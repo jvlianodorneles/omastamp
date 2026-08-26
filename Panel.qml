@@ -540,7 +540,7 @@ Panel {
               anchors.margins: Style.space(8)
               clip: true
 
-              // ASCII Art Preview
+              // ASCII Art Preview (strictly monospace, left-aligned characters inside centered box)
               Item {
                 anchors.centerIn: parent
                 visible: root.isAsciiFont
@@ -554,10 +554,14 @@ Panel {
                   anchors.centerIn: parent
                   text: root.renderedAscii || root.customText
                   color: (root.tintMode === "theme-accent") ? Color.accent : ((root.tintMode === "theme-fg") ? Color.foreground : (root.customColor || "#ffffff"))
-                  font.family: Style.fontMonospace ? Style.fontMonospace.family : "monospace"
+                  textFormat: Text.PlainText
+                  font.family: "monospace"
+                  font.kerning: false
+                  font.hintingPreference: Font.PreferFullHinting
                   font.pixelSize: 10
-                  lineHeight: 0.95
-                  horizontalAlignment: Text.AlignHCenter
+                  lineHeight: 1.0
+                  lineHeightMode: Text.ProportionalHeight
+                  horizontalAlignment: Text.AlignLeft
                 }
               }
 

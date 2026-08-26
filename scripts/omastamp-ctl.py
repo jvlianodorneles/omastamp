@@ -100,14 +100,20 @@ def render_ascii_art(text: str, font: str) -> str:
         return ""
     try:
         import pyfiglet
-        f = pyfiglet.Figlet(font=font, width=120)
+        f = pyfiglet.Figlet(font=font, width=2000)
         res = f.renderText(text)
-        lines = [l.rstrip() for l in res.split("\n")]
-        while lines and not lines[-1]:
-            lines.pop()
-        while lines and not lines[0]:
-            lines.pop(0)
-        return "\n".join(lines)
+        raw_lines = res.split("\n")
+        # Strip outer empty vertical padding lines
+        while raw_lines and not raw_lines[-1].strip():
+            raw_lines.pop()
+        while raw_lines and not raw_lines[0].strip():
+            raw_lines.pop(0)
+        if not raw_lines:
+            return ""
+        # Pad all lines to the exact same maximum line width to prevent misalignment
+        max_len = max(len(l) for l in raw_lines)
+        padded_lines = [l.ljust(max_len) for l in raw_lines]
+        return "\n".join(padded_lines)
     except Exception:
         return text
 

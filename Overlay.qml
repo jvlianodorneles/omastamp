@@ -349,20 +349,24 @@ Item {
             width: implicitWidth
             height: implicitHeight
 
-            // ASCII Art Text Watermark (using pyfiglet like OmaSaver)
+            // ASCII Art Text Watermark (with strict fixed-width monospace alignment)
             Text {
               id: asciiText
               anchors.centerIn: parent
               visible: root.isAsciiFont
               text: root.renderedAscii || root.customText
               color: root.resolvedTintColor
-              font.family: Style.fontMonospace ? Style.fontMonospace.family : "monospace"
+              textFormat: Text.PlainText
+              font.family: "monospace"
+              font.kerning: false
+              font.hintingPreference: Font.PreferFullHinting
               font.pixelSize: Math.max(7, Math.round(root.stampSize * 0.045))
-              lineHeight: 0.95
-              horizontalAlignment: Text.AlignHCenter
+              lineHeight: 1.0
+              lineHeightMode: Text.ProportionalHeight
+              horizontalAlignment: Text.AlignLeft
             }
 
-            // Pro Typography Text Watermark (Main Title only)
+            // Pro Typography Text Watermark
             Text {
               id: mainText
               anchors.centerIn: parent
