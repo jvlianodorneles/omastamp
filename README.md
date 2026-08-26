@@ -6,6 +6,8 @@
 [![Omarchy](https://img.shields.io/badge/Omarchy-Quattro-blue.svg)](https://omarchy.org)
 [![Platform](https://img.shields.io/badge/Platform-Linux%20%2F%20Wayland%20%2F%20Hyprland-informational.svg)]()
 
+![OmaStamp Preview](preview.png)
+
 **OmaStamp** stamps clean, customizable logos, distro crests, vector insignias, and typographic or ASCII art watermarks directly over your desktop wallpaper. It runs seamlessly behind all application windows on Wayland LayerShell (`WlrLayer.Bottom`), completely transparent to mouse clicks (`mask: Region {}`).
 
 ---
