@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 OmaStamp Controller & CLI Backend
-Manages desktop logo overlay configuration, presets, and state persistence.
+Manages desktop logo overlay configuration, presets, typography fonts, and state persistence.
 """
 
 import sys
@@ -26,6 +26,29 @@ PRESETS = [
     {"id": "arcade-ghost", "name": "Arcade Ghost", "desc": "Retro 8-bit arcade pixel ghost"},
     {"id": "terminal", "name": "Dev Terminal", "desc": "Code prompt prompt badge"},
     {"id": "minimal-star", "name": "Minimal Star", "desc": "Modern 4-point starburst compass"}
+]
+
+FONTS = [
+    {"id": "modern-sans", "name": "Modern Sans", "type": "pro", "desc": "Clean geometric sans-serif"},
+    {"id": "mono", "name": "Monospace", "type": "pro", "desc": "Terminal developer code font"},
+    {"id": "serif", "name": "Classic Serif", "type": "pro", "desc": "Editorial elegant serif"},
+    {"id": "display", "name": "Display Impact", "type": "pro", "desc": "Heavy bold headline font"},
+    {"id": "condensed", "name": "Tall Condensed", "type": "pro", "desc": "Condensed poster typography"},
+    {"id": "slant", "name": "Slant", "type": "ascii", "desc": "Italicized ASCII art font"},
+    {"id": "standard", "name": "Standard", "type": "ascii", "desc": "Classic ANSI/ASCII banner"},
+    {"id": "block", "name": "Block", "type": "ascii", "desc": "Solid 3D block characters"},
+    {"id": "banner", "name": "Banner", "type": "ascii", "desc": "Large bold banner characters"},
+    {"id": "doom", "name": "Doom", "type": "ascii", "desc": "Retro Doom gaming font"},
+    {"id": "epic", "name": "Epic", "type": "ascii", "desc": "Dramatic high-impact font"},
+    {"id": "starwars", "name": "Star Wars", "type": "ascii", "desc": "Sci-Fi iconic logo font"},
+    {"id": "isometric1", "name": "Isometric", "type": "ascii", "desc": "3D isometric perspective font"},
+    {"id": "graffiti", "name": "Graffiti", "type": "ascii", "desc": "Urban street art letters"},
+    {"id": "speed", "name": "Speed", "type": "ascii", "desc": "Fast italicized stroke font"},
+    {"id": "sub-zero", "name": "Sub-Zero", "type": "ascii", "desc": "Chiseled frosty block font"},
+    {"id": "cyberlarge", "name": "Cyberlarge", "type": "ascii", "desc": "Cyberpunk terminal banner"},
+    {"id": "shadow", "name": "Shadow", "type": "ascii", "desc": "Outlined shaded letters"},
+    {"id": "alligator", "name": "Alligator", "type": "ascii", "desc": "Grooved tech characters"},
+    {"id": "delta_corps_priest_1", "name": "Delta Corps", "type": "ascii", "desc": "Signature OmaSaver combat font"}
 ]
 
 POSITIONS = [
@@ -66,9 +89,28 @@ DEFAULTS = {
     "customImagePath": "",
     "customText": "OMARCHY",
     "customSubtext": "",
+    "textFont": "modern-sans",
+    "renderedAscii": "",
     "primaryScreenOnly": False,
     "showLabel": True
 }
+
+
+def render_ascii_art(text: str, font: str) -> str:
+    if not text.strip():
+        return ""
+    try:
+        import pyfiglet
+        f = pyfiglet.Figlet(font=font, width=120)
+        res = f.renderText(text)
+        lines = [l.rstrip() for l in res.split("\n")]
+        while lines and not lines[-1]:
+            lines.pop()
+        while lines and not lines[0]:
+            lines.pop(0)
+        return "\n".join(lines)
+    except Exception:
+        return text
 
 
 def load_config() -> dict:
@@ -88,6 +130,13 @@ def load_config() -> dict:
 
 def save_config(cfg: dict):
     STATE_DIR.mkdir(parents=True, exist_ok=True)
+    font_id = cfg.get("textFont", "modern-sans")
+    ascii_ids = [f["id"] for f in FONTS if f["type"] == "ascii"]
+    if font_id in ascii_ids:
+        cfg["renderedAscii"] = render_ascii_art(cfg.get("customText", "OMARCHY"), font_id)
+    else:
+        cfg["renderedAscii"] = ""
+
     tmp = CONFIG_FILE.with_suffix(".tmp")
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(cfg, f, indent=2)
@@ -200,6 +249,12 @@ def main():
     p_txt = subparsers.add_parser("set-text", help="Set custom text / monogram")
     p_txt.add_argument("text", help="Main watermark text string")
     p_txt.add_argument("subtext", nargs="?", default="", help="Optional subtext tagline")
+    p_txt.add_argument("--font", dest="font", choices=[f["id"] for f in FONTS], help="Typography or ASCII font style")
+
+    p_font = subparsers.add_parser("set-font", help="Set watermark text font style")
+    p_font.add_argument("font", choices=[f["id"] for f in FONTS], help="Font identifier")
+
+    subparsers.add_parser("list-fonts", help="List all available text typography & ASCII fonts")
 
     # position
     p_pos = subparsers.add_parser("set-position", help="Set screen alignment position")
@@ -262,7 +317,7 @@ def main():
         elif mode == "image":
             target = f"Image '{os.path.basename(cfg.get('customImagePath', 'none'))}'"
         else:
-            target = f"Text '{cfg.get('customText')}'"
+            target = f"Text '{cfg.get('customText')}' (Font: {cfg.get('textFont', 'modern-sans')})"
 
         print("──────────────────────────────────────────")
         print(f" 🖃  OmaStamp — Desktop Logo Overlay")
@@ -285,6 +340,13 @@ def main():
         for p in PRESETS:
             cur = " (active)" if p["id"] == cfg.get("preset") else ""
             print(f"  • {p['id']:<14} : {p['name']:<18} — {p['desc']}{cur}")
+        return
+
+    if args.command == "list-fonts":
+        print("Available Typography & ASCII Fonts:")
+        for f in FONTS:
+            cur = " (active)" if f["id"] == cfg.get("textFont") else ""
+            print(f"  • [{f['type'].upper():<5}] {f['id']:<20} : {f['name']:<20} — {f['desc']}{cur}")
         return
 
     if args.command == "toggle":
@@ -355,8 +417,17 @@ def main():
         cfg["customText"] = args.text
         if args.subtext:
             cfg["customSubtext"] = args.subtext
+        if args.font:
+            cfg["textFont"] = args.font
         save_config(cfg)
-        print(f"✓ Custom text set to '{args.text}'")
+        print(f"✓ Custom text set to '{args.text}' (Font: {cfg.get('textFont', 'modern-sans')})")
+        return
+
+    if args.command == "set-font":
+        cfg["mode"] = "text"
+        cfg["textFont"] = args.font
+        save_config(cfg)
+        print(f"✓ Watermark font set to '{args.font}'")
         return
 
     if args.command == "set-position":

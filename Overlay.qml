@@ -28,7 +28,19 @@ Item {
   property string customImagePath: ""
   property string customText: "OMARCHY"
   property string customSubtext: ""
+  property string textFont: "modern-sans"
+  property string renderedAscii: ""
   property bool primaryScreenOnly: false
+
+  readonly property bool isAsciiFont: textFont !== "modern-sans" && textFont !== "mono" && textFont !== "serif" && textFont !== "display" && textFont !== "condensed"
+
+  function fontFamilyFor(fontId) {
+    if (fontId === "mono") return (Style.fontMonospace ? Style.fontMonospace.family : "monospace")
+    if (fontId === "serif") return "serif"
+    if (fontId === "display") return (Style.fontDisplay ? Style.fontDisplay.family : "sans-serif")
+    if (fontId === "condensed") return "sans-serif"
+    return (Style.fontBold ? Style.fontBold.family : "sans-serif")
+  }
 
   // Injected properties from shell if available
   property var shell: null
@@ -77,6 +89,8 @@ Item {
             if (cfg.customImagePath !== undefined) root.customImagePath = String(cfg.customImagePath)
             if (cfg.customText !== undefined) root.customText = String(cfg.customText)
             if (cfg.customSubtext !== undefined) root.customSubtext = String(cfg.customSubtext)
+            if (cfg.textFont !== undefined) root.textFont = String(cfg.textFont)
+            if (cfg.renderedAscii !== undefined) root.renderedAscii = String(cfg.renderedAscii)
             if (cfg.primaryScreenOnly !== undefined) root.primaryScreenOnly = Boolean(cfg.primaryScreenOnly)
           }
         }
@@ -107,6 +121,8 @@ Item {
       "customImagePath": root.customImagePath,
       "customText": root.customText,
       "customSubtext": root.customSubtext,
+      "textFont": root.textFont,
+      "renderedAscii": root.renderedAscii,
       "primaryScreenOnly": root.primaryScreenOnly
     }
     configFile.setText(JSON.stringify(payload, null, 2) + "\n")
@@ -161,20 +177,20 @@ Item {
       root.setEnabled(false)
     }
 
-    function setPreset(name: string): void {
-      root.setPreset(name)
+    function setPreset(preset: string): void {
+      root.setPreset(preset)
     }
 
-    function setPosition(pos: string): void {
-      root.setPosition(pos)
+    function setPosition(position: string): void {
+      root.setPosition(position)
     }
 
-    function setOpacity(val: string): void {
-      root.setOpacity(parseInt(val, 10))
+    function setOpacity(opacity: int): void {
+      root.setOpacity(opacity)
     }
 
-    function setSize(val: string): void {
-      root.setSize(parseInt(val, 10))
+    function setSize(size: int): void {
+      root.setSize(size)
     }
 
     function setTint(mode: string): void {
@@ -207,7 +223,6 @@ Item {
       WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
       // Empty input mask makes the overlay 100% click-through!
-      // Mouse clicks pass directly through to desktop wallpaper & windows.
       mask: Region {}
 
       visible: root.stampEnabled && (!root.primaryScreenOnly || (Quickshell.screens.length > 0 && modelData === Quickshell.screens[0]))
@@ -222,9 +237,12 @@ Item {
         Item {
           id: stampItem
 
-          readonly property real baseWidth: root.stampSize
-          readonly property real baseHeight: (root.mode === "text" && root.customSubtext.length > 0)
-            ? Math.round(root.stampSize * 0.75)
+          readonly property real baseWidth: (root.mode === "text" && root.isAsciiFont)
+            ? Math.max(root.stampSize, asciiText.implicitWidth)
+            : root.stampSize
+
+          readonly property real baseHeight: (root.mode === "text")
+            ? (root.isAsciiFont ? Math.max(root.stampSize * 0.4, asciiText.implicitHeight) : ((root.customSubtext.length > 0) ? Math.round(root.stampSize * 0.75) : Math.round(root.stampSize * 0.4)))
             : ((root.mode === "preset" && root.presetId === "omarchy-text")
                 ? Math.round(root.stampSize * 0.28)
                 : root.stampSize)
@@ -323,39 +341,61 @@ Item {
           }
 
           // -------------------------------------------------------
-          // Content 3: Typographic Text Watermark
+          // Content 3: Typographic / ASCII Text Watermark
           // -------------------------------------------------------
-          ColumnLayout {
+          Item {
             id: textLayout
             anchors.centerIn: parent
             visible: root.mode === "text"
-            spacing: Style.space(6)
+            width: root.isAsciiFont ? asciiText.implicitWidth : proTextLayout.implicitWidth
+            height: root.isAsciiFont ? asciiText.implicitHeight : proTextLayout.implicitHeight
 
+            // ASCII Art Text Watermark (using pyfiglet like OmaSaver)
             Text {
-              id: mainText
-              Layout.alignment: Qt.AlignHCenter
-              text: root.customText
+              id: asciiText
+              anchors.centerIn: parent
+              visible: root.isAsciiFont
+              text: root.renderedAscii || root.customText
               color: root.resolvedTintColor
-              font.family: Style.fontBold ? Style.fontBold.family : "sans-serif"
-              font.pixelSize: Math.max(16, Math.round(root.stampSize * 0.22))
-              font.bold: true
-              font.letterSpacing: 4
-              font.capitalization: Font.AllUppercase
+              font.family: Style.fontMonospace ? Style.fontMonospace.family : "monospace"
+              font.pixelSize: Math.max(7, Math.round(root.stampSize * 0.045))
+              lineHeight: 0.95
               horizontalAlignment: Text.AlignHCenter
             }
 
-            Text {
-              id: subText
-              Layout.alignment: Qt.AlignHCenter
-              visible: root.customSubtext.length > 0
-              text: root.customSubtext
-              color: root.resolvedTintColor
-              opacity: 0.75
-              font.family: Style.fontRegular ? Style.fontRegular.family : "sans-serif"
-              font.pixelSize: Math.max(10, Math.round(root.stampSize * 0.08))
-              font.letterSpacing: 3
-              font.capitalization: Font.AllUppercase
-              horizontalAlignment: Text.AlignHCenter
+            // Pro Typography Text Watermark
+            ColumnLayout {
+              id: proTextLayout
+              anchors.centerIn: parent
+              visible: !root.isAsciiFont
+              spacing: Style.space(6)
+
+              Text {
+                id: mainText
+                Layout.alignment: Qt.AlignHCenter
+                text: root.customText
+                color: root.resolvedTintColor
+                font.family: root.fontFamilyFor(root.textFont)
+                font.pixelSize: Math.max(16, Math.round(root.stampSize * 0.22))
+                font.bold: true
+                font.letterSpacing: (root.textFont === "mono" || root.textFont === "condensed") ? 6 : 4
+                font.capitalization: (root.textFont === "condensed" || root.textFont === "display") ? Font.AllUppercase : Font.MixedCase
+                horizontalAlignment: Text.AlignHCenter
+              }
+
+              Text {
+                id: subText
+                Layout.alignment: Qt.AlignHCenter
+                visible: root.customSubtext.length > 0
+                text: root.customSubtext
+                color: root.resolvedTintColor
+                opacity: 0.75
+                font.family: Style.fontRegular ? Style.fontRegular.family : "sans-serif"
+                font.pixelSize: Math.max(10, Math.round(root.stampSize * 0.08))
+                font.letterSpacing: 3
+                font.capitalization: Font.AllUppercase
+                horizontalAlignment: Text.AlignHCenter
+              }
             }
           }
         }

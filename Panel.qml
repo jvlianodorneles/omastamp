@@ -38,7 +38,19 @@ Panel {
   property string customImagePath: ""
   property string customText: "OMARCHY"
   property string customSubtext: ""
+  property string textFont: "modern-sans"
+  property string renderedAscii: ""
   property bool primaryScreenOnly: false
+
+  readonly property bool isAsciiFont: textFont !== "modern-sans" && textFont !== "mono" && textFont !== "serif" && textFont !== "display" && textFont !== "condensed"
+
+  function fontFamilyFor(fontId) {
+    if (fontId === "mono") return (Style.fontMonospace ? Style.fontMonospace.family : "monospace")
+    if (fontId === "serif") return "serif"
+    if (fontId === "display") return (Style.fontDisplay ? Style.fontDisplay.family : "sans-serif")
+    if (fontId === "condensed") return "sans-serif"
+    return (Style.fontBold ? Style.fontBold.family : "sans-serif")
+  }
 
   readonly property var presetsList: [
     { id: "omarchy", name: "Omarchy", icon: "assets/logos/omarchy.svg" },
@@ -51,6 +63,29 @@ Panel {
     { id: "arcade-ghost", name: "Arcade Ghost", icon: "assets/logos/arcade-ghost.svg" },
     { id: "terminal", name: "Terminal", icon: "assets/logos/terminal.svg" },
     { id: "minimal-star", name: "Minimal Star", icon: "assets/logos/minimal-star.svg" }
+  ]
+
+  readonly property var fontPresetsList: [
+    { id: "modern-sans", name: "Modern Sans", type: "pro" },
+    { id: "mono", name: "Monospace", type: "pro" },
+    { id: "serif", name: "Serif", type: "pro" },
+    { id: "display", name: "Display", type: "pro" },
+    { id: "condensed", name: "Condensed", type: "pro" },
+    { id: "slant", name: "Slant", type: "ascii" },
+    { id: "standard", name: "Standard", type: "ascii" },
+    { id: "block", name: "Block", type: "ascii" },
+    { id: "banner", name: "Banner", type: "ascii" },
+    { id: "doom", name: "Doom", type: "ascii" },
+    { id: "epic", name: "Epic", type: "ascii" },
+    { id: "starwars", name: "Star Wars", type: "ascii" },
+    { id: "isometric1", name: "Isometric", type: "ascii" },
+    { id: "graffiti", name: "Graffiti", type: "ascii" },
+    { id: "speed", name: "Speed", type: "ascii" },
+    { id: "sub-zero", name: "Sub-Zero", type: "ascii" },
+    { id: "cyberlarge", name: "Cyber", type: "ascii" },
+    { id: "shadow", name: "Shadow", type: "ascii" },
+    { id: "alligator", name: "Alligator", type: "ascii" },
+    { id: "delta_corps_priest_1", name: "Delta Corps", type: "ascii" }
   ]
 
   readonly property var positionsList: [
@@ -103,6 +138,8 @@ Panel {
             if (cfg.customImagePath !== undefined) root.customImagePath = String(cfg.customImagePath)
             if (cfg.customText !== undefined) root.customText = String(cfg.customText)
             if (cfg.customSubtext !== undefined) root.customSubtext = String(cfg.customSubtext)
+            if (cfg.textFont !== undefined) root.textFont = String(cfg.textFont)
+            if (cfg.renderedAscii !== undefined) root.renderedAscii = String(cfg.renderedAscii)
             if (cfg.primaryScreenOnly !== undefined) root.primaryScreenOnly = Boolean(cfg.primaryScreenOnly)
           }
         }
@@ -129,9 +166,16 @@ Panel {
       "customImagePath": root.customImagePath,
       "customText": root.customText,
       "customSubtext": root.customSubtext,
+      "textFont": root.textFont,
+      "renderedAscii": root.renderedAscii,
       "primaryScreenOnly": root.primaryScreenOnly
     }
     configFile.setText(JSON.stringify(payload, null, 2) + "\n")
+  }
+
+  function updateTextSettings() {
+    root.saveConfig()
+    Util.execDetached("omastamp set-text " + Util.shellQuote(root.customText) + " " + Util.shellQuote(root.customSubtext) + " --font " + Util.shellQuote(root.textFont))
   }
 
   function resetDefaults() {
@@ -151,6 +195,8 @@ Panel {
     root.customImagePath = ""
     root.customText = "OMARCHY"
     root.customSubtext = ""
+    root.textFont = "modern-sans"
+    root.renderedAscii = ""
     root.primaryScreenOnly = false
     saveConfig()
   }
@@ -214,7 +260,7 @@ Panel {
 
           iconComponent: Component {
             Text {
-              text: "󰹢"
+              text: "\udb83\ude62"
               font.family: root.fontFamily
               font.pixelSize: Style.font.display
               color: root.stampEnabled ? Color.accent : Qt.darker(Color.foreground, 1.4)
@@ -283,7 +329,7 @@ Panel {
             bordered: true
             onClicked: {
               root.mode = "text"
-              root.saveConfig()
+              root.updateTextSettings()
             }
           }
         }
@@ -441,7 +487,7 @@ Panel {
         }
 
         // -------------------------------------------------------------
-        // Content 3: Watermark Text Inputs
+        // Content 3: Watermark Text Inputs & OmaSaver-Style Font Picker
         // -------------------------------------------------------------
         ColumnLayout {
           Layout.fillWidth: true
@@ -468,7 +514,7 @@ Panel {
                 placeholderText: "e.g. OMARCHY"
                 onEditingFinished: {
                   root.customText = text.trim()
-                  root.saveConfig()
+                  root.updateTextSettings()
                 }
               }
             }
@@ -489,7 +535,134 @@ Panel {
                 placeholderText: "e.g. ARCH LINUX"
                 onEditingFinished: {
                   root.customSubtext = text.trim()
-                  root.saveConfig()
+                  root.updateTextSettings()
+                }
+              }
+            }
+          }
+
+          // Font Presets Section (20 Fonts: Pro Typography & ASCII Art)
+          Text {
+            text: "Typography & ASCII Fonts (20 Available):"
+            font.family: Style.fontRegular ? Style.fontRegular.family : "sans-serif"
+            font.pixelSize: 11
+            color: Color.foreground
+          }
+
+          GridLayout {
+            Layout.fillWidth: true
+            columns: 5
+            rowSpacing: Style.space(4)
+            columnSpacing: Style.space(4)
+
+            Repeater {
+              model: root.fontPresetsList
+              delegate: Rectangle {
+                id: fontCard
+                required property var modelData
+                required property int index
+
+                Layout.fillWidth: true
+                height: Style.space(28)
+                radius: Style.cornerRadius
+                clip: true
+                color: (root.textFont === modelData.id)
+                  ? Util.alpha(Color.accent, 0.22)
+                  : (fontMouse.containsMouse ? Util.alpha(Color.foreground, 0.1) : Util.alpha(Color.popups.background, 0.6))
+                border.color: (root.textFont === modelData.id) ? Color.accent : Util.alpha(Color.popups.border, 0.45)
+                border.width: (root.textFont === modelData.id) ? 2 : 1
+
+                Text {
+                  anchors.centerIn: parent
+                  width: parent.width - Style.space(6)
+                  text: modelData.name
+                  font.family: Style.fontRegular ? Style.fontRegular.family : "sans-serif"
+                  font.pixelSize: 10
+                  font.bold: root.textFont === modelData.id
+                  color: (root.textFont === modelData.id) ? Color.accent : Color.foreground
+                  horizontalAlignment: Text.AlignHCenter
+                  elide: Text.ElideRight
+                  maximumLineCount: 1
+                }
+
+                MouseArea {
+                  id: fontMouse
+                  anchors.fill: parent
+                  hoverEnabled: true
+                  cursorShape: Qt.PointingHandCursor
+                  onClicked: {
+                    root.textFont = modelData.id
+                    root.mode = "text"
+                    root.updateTextSettings()
+                  }
+                }
+              }
+            }
+          }
+
+          // Live Text Watermark Preview Box
+          Rectangle {
+            Layout.fillWidth: true
+            height: Style.space(64)
+            radius: Style.cornerRadius
+            clip: true
+            color: Util.alpha(Color.popups.background, 0.5)
+            border.color: Util.alpha(Color.popups.border, 0.4)
+            border.width: 1
+
+            Flickable {
+              anchors.fill: parent
+              anchors.margins: Style.space(4)
+              contentWidth: previewContent.implicitWidth
+              contentHeight: previewContent.implicitHeight
+              clip: true
+
+              Item {
+                id: previewContent
+                anchors.centerIn: parent
+                width: root.isAsciiFont ? previewAscii.implicitWidth : previewPro.implicitWidth
+                height: root.isAsciiFont ? previewAscii.implicitHeight : previewPro.implicitHeight
+
+                Text {
+                  id: previewAscii
+                  anchors.centerIn: parent
+                  visible: root.isAsciiFont
+                  text: root.renderedAscii || root.customText
+                  color: Color.accent
+                  font.family: Style.fontMonospace ? Style.fontMonospace.family : "monospace"
+                  font.pixelSize: 8
+                  lineHeight: 0.95
+                  horizontalAlignment: Text.AlignHCenter
+                }
+
+                ColumnLayout {
+                  id: previewPro
+                  anchors.centerIn: parent
+                  visible: !root.isAsciiFont
+                  spacing: Style.space(2)
+
+                  Text {
+                    Layout.alignment: Qt.AlignHCenter
+                    text: root.customText
+                    color: Color.accent
+                    font.family: root.fontFamilyFor(root.textFont)
+                    font.pixelSize: 15
+                    font.bold: true
+                    font.letterSpacing: (root.textFont === "mono" || root.textFont === "condensed") ? 4 : 2
+                    horizontalAlignment: Text.AlignHCenter
+                  }
+
+                  Text {
+                    Layout.alignment: Qt.AlignHCenter
+                    visible: root.customSubtext.length > 0
+                    text: root.customSubtext
+                    color: Color.accent
+                    opacity: 0.75
+                    font.family: Style.fontRegular ? Style.fontRegular.family : "sans-serif"
+                    font.pixelSize: 9
+                    font.letterSpacing: 2
+                    horizontalAlignment: Text.AlignHCenter
+                  }
                 }
               }
             }
