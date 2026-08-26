@@ -237,12 +237,12 @@ Item {
         Item {
           id: stampItem
 
-          readonly property real baseWidth: (root.mode === "text" && root.isAsciiFont)
-            ? Math.max(root.stampSize, asciiText.implicitWidth)
+          readonly property real baseWidth: (root.mode === "text")
+            ? Math.max(root.stampSize, textLayout.implicitWidth)
             : root.stampSize
 
           readonly property real baseHeight: (root.mode === "text")
-            ? (root.isAsciiFont ? Math.max(root.stampSize * 0.4, asciiText.implicitHeight) : ((root.customSubtext.length > 0) ? Math.round(root.stampSize * 0.75) : Math.round(root.stampSize * 0.4)))
+            ? Math.max(root.stampSize * 0.35, textLayout.implicitHeight)
             : ((root.mode === "preset" && root.presetId === "omarchy-text")
                 ? Math.round(root.stampSize * 0.28)
                 : root.stampSize)
@@ -347,23 +347,45 @@ Item {
             id: textLayout
             anchors.centerIn: parent
             visible: root.mode === "text"
-            width: root.isAsciiFont ? asciiText.implicitWidth : proTextLayout.implicitWidth
-            height: root.isAsciiFont ? asciiText.implicitHeight : proTextLayout.implicitHeight
+            implicitWidth: root.isAsciiFont ? asciiLayout.implicitWidth : proTextLayout.implicitWidth
+            implicitHeight: root.isAsciiFont ? asciiLayout.implicitHeight : proTextLayout.implicitHeight
+            width: implicitWidth
+            height: implicitHeight
 
-            // ASCII Art Text Watermark (using pyfiglet like OmaSaver)
-            Text {
-              id: asciiText
+            // ASCII Art Text Watermark (using pyfiglet like OmaSaver) + Subtext Tagline
+            ColumnLayout {
+              id: asciiLayout
               anchors.centerIn: parent
               visible: root.isAsciiFont
-              text: root.renderedAscii || root.customText
-              color: root.resolvedTintColor
-              font.family: Style.fontMonospace ? Style.fontMonospace.family : "monospace"
-              font.pixelSize: Math.max(7, Math.round(root.stampSize * 0.045))
-              lineHeight: 0.95
-              horizontalAlignment: Text.AlignHCenter
+              spacing: Style.space(4)
+
+              Text {
+                id: asciiText
+                Layout.alignment: Qt.AlignHCenter
+                text: root.renderedAscii || root.customText
+                color: root.resolvedTintColor
+                font.family: Style.fontMonospace ? Style.fontMonospace.family : "monospace"
+                font.pixelSize: Math.max(7, Math.round(root.stampSize * 0.045))
+                lineHeight: 0.95
+                horizontalAlignment: Text.AlignHCenter
+              }
+
+              Text {
+                id: asciiSubText
+                Layout.alignment: Qt.AlignHCenter
+                visible: root.customSubtext.length > 0
+                text: root.customSubtext
+                color: root.resolvedTintColor
+                opacity: 0.8
+                font.family: Style.fontRegular ? Style.fontRegular.family : "sans-serif"
+                font.pixelSize: Math.max(10, Math.round(root.stampSize * 0.07))
+                font.letterSpacing: 3
+                font.capitalization: Font.AllUppercase
+                horizontalAlignment: Text.AlignHCenter
+              }
             }
 
-            // Pro Typography Text Watermark
+            // Pro Typography Text Watermark (Main Title + Subtext Tagline)
             ColumnLayout {
               id: proTextLayout
               anchors.centerIn: parent
@@ -389,7 +411,7 @@ Item {
                 visible: root.customSubtext.length > 0
                 text: root.customSubtext
                 color: root.resolvedTintColor
-                opacity: 0.75
+                opacity: 0.8
                 font.family: Style.fontRegular ? Style.fontRegular.family : "sans-serif"
                 font.pixelSize: Math.max(10, Math.round(root.stampSize * 0.08))
                 font.letterSpacing: 3

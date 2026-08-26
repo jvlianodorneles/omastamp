@@ -65,27 +65,27 @@ Panel {
     { id: "minimal-star", name: "Minimal Star", icon: "assets/logos/minimal-star.svg" }
   ]
 
-  readonly property var fontPresetsList: [
-    { id: "modern-sans", name: "Modern Sans", type: "pro" },
-    { id: "mono", name: "Monospace", type: "pro" },
-    { id: "serif", name: "Serif", type: "pro" },
-    { id: "display", name: "Display", type: "pro" },
-    { id: "condensed", name: "Condensed", type: "pro" },
-    { id: "slant", name: "Slant", type: "ascii" },
-    { id: "standard", name: "Standard", type: "ascii" },
-    { id: "block", name: "Block", type: "ascii" },
-    { id: "banner", name: "Banner", type: "ascii" },
-    { id: "doom", name: "Doom", type: "ascii" },
-    { id: "epic", name: "Epic", type: "ascii" },
-    { id: "starwars", name: "Star Wars", type: "ascii" },
-    { id: "isometric1", name: "Isometric", type: "ascii" },
-    { id: "graffiti", name: "Graffiti", type: "ascii" },
-    { id: "speed", name: "Speed", type: "ascii" },
-    { id: "sub-zero", name: "Sub-Zero", type: "ascii" },
-    { id: "cyberlarge", name: "Cyber", type: "ascii" },
-    { id: "shadow", name: "Shadow", type: "ascii" },
-    { id: "alligator", name: "Alligator", type: "ascii" },
-    { id: "delta_corps_priest_1", name: "Delta Corps", type: "ascii" }
+  readonly property var fontOptions: [
+    { value: "modern-sans", label: "Modern Sans (Typography)" },
+    { value: "mono", label: "Monospace (Typography)" },
+    { value: "serif", label: "Classic Serif (Typography)" },
+    { value: "display", label: "Display Impact (Typography)" },
+    { value: "condensed", label: "Tall Condensed (Typography)" },
+    { value: "slant", label: "Slant (ASCII Art)" },
+    { value: "standard", label: "Standard (ASCII Art)" },
+    { value: "block", label: "Block (ASCII Art)" },
+    { value: "banner", label: "Banner (ASCII Art)" },
+    { value: "doom", label: "Doom (ASCII Art)" },
+    { value: "epic", label: "Epic (ASCII Art)" },
+    { value: "starwars", label: "Star Wars (ASCII Art)" },
+    { value: "isometric1", label: "Isometric (ASCII Art)" },
+    { value: "graffiti", label: "Graffiti (ASCII Art)" },
+    { value: "speed", label: "Speed (ASCII Art)" },
+    { value: "sub-zero", label: "Sub-Zero (ASCII Art)" },
+    { value: "cyberlarge", label: "Cyber (ASCII Art)" },
+    { value: "shadow", label: "Shadow (ASCII Art)" },
+    { value: "alligator", label: "Alligator (ASCII Art)" },
+    { value: "delta_corps_priest_1", label: "Delta Corps (ASCII Art)" }
   ]
 
   readonly property var positionsList: [
@@ -487,12 +487,12 @@ Panel {
         }
 
         // -------------------------------------------------------------
-        // Content 3: Watermark Text Inputs & OmaSaver-Style Font Picker
+        // Content 3: Watermark Text Inputs & Font Dropdown
         // -------------------------------------------------------------
         ColumnLayout {
           Layout.fillWidth: true
           visible: root.mode === "text"
-          spacing: Style.space(6)
+          spacing: Style.space(8)
 
           RowLayout {
             Layout.fillWidth: true
@@ -541,114 +541,56 @@ Panel {
             }
           }
 
-          // Font Presets Section (20 Fonts: Pro Typography & ASCII Art)
-          Text {
-            text: "Typography & ASCII Fonts (20 Available):"
-            font.family: Style.fontRegular ? Style.fontRegular.family : "sans-serif"
-            font.pixelSize: 11
-            color: Color.foreground
-          }
-
-          GridLayout {
+          // Font Selector Dropdown
+          Dropdown {
             Layout.fillWidth: true
-            columns: 5
-            rowSpacing: Style.space(4)
-            columnSpacing: Style.space(4)
-
-            Repeater {
-              model: root.fontPresetsList
-              delegate: Rectangle {
-                id: fontCard
-                required property var modelData
-                required property int index
-
-                Layout.fillWidth: true
-                height: Style.space(28)
-                radius: Style.cornerRadius
-                clip: true
-                color: (root.textFont === modelData.id)
-                  ? Util.alpha(Color.accent, 0.22)
-                  : (fontMouse.containsMouse ? Util.alpha(Color.foreground, 0.1) : Util.alpha(Color.popups.background, 0.6))
-                border.color: (root.textFont === modelData.id) ? Color.accent : Util.alpha(Color.popups.border, 0.45)
-                border.width: (root.textFont === modelData.id) ? 2 : 1
-
-                Text {
-                  anchors.centerIn: parent
-                  width: parent.width - Style.space(6)
-                  text: modelData.name
-                  font.family: Style.fontRegular ? Style.fontRegular.family : "sans-serif"
-                  font.pixelSize: 10
-                  font.bold: root.textFont === modelData.id
-                  color: (root.textFont === modelData.id) ? Color.accent : Color.foreground
-                  horizontalAlignment: Text.AlignHCenter
-                  elide: Text.ElideRight
-                  maximumLineCount: 1
-                }
-
-                MouseArea {
-                  id: fontMouse
-                  anchors.fill: parent
-                  hoverEnabled: true
-                  cursorShape: Qt.PointingHandCursor
-                  onClicked: {
-                    root.textFont = modelData.id
-                    root.mode = "text"
-                    root.updateTextSettings()
-                  }
-                }
-              }
+            label: "Typography & ASCII Style:"
+            options: root.fontOptions
+            value: root.textFont
+            fontFamily: root.fontFamily
+            onChanged: function(v) {
+              root.textFont = v
+              root.mode = "text"
+              root.updateTextSettings()
             }
           }
 
-          // Live Text Watermark Preview Box
+          // Live Text Watermark Preview Box (with Auto-Scaling to fit all text!)
           Rectangle {
             Layout.fillWidth: true
-            height: Style.space(64)
+            height: Style.space(96)
             radius: Style.cornerRadius
             clip: true
             color: Util.alpha(Color.popups.background, 0.5)
             border.color: Util.alpha(Color.popups.border, 0.4)
             border.width: 1
 
-            Flickable {
+            Item {
               anchors.fill: parent
-              anchors.margins: Style.space(4)
-              contentWidth: previewContent.implicitWidth
-              contentHeight: previewContent.implicitHeight
+              anchors.margins: Style.space(8)
               clip: true
 
+              // ASCII Art Preview
               Item {
-                id: previewContent
                 anchors.centerIn: parent
-                width: root.isAsciiFont ? previewAscii.implicitWidth : previewPro.implicitWidth
-                height: root.isAsciiFont ? previewAscii.implicitHeight : previewPro.implicitHeight
-
-                Text {
-                  id: previewAscii
-                  anchors.centerIn: parent
-                  visible: root.isAsciiFont
-                  text: root.renderedAscii || root.customText
-                  color: Color.accent
-                  font.family: Style.fontMonospace ? Style.fontMonospace.family : "monospace"
-                  font.pixelSize: 8
-                  lineHeight: 0.95
-                  horizontalAlignment: Text.AlignHCenter
-                }
+                visible: root.isAsciiFont
+                width: asciiPreviewLayout.implicitWidth
+                height: asciiPreviewLayout.implicitHeight
+                scale: Math.min(1.0, Math.min((parent.width - Style.space(8)) / Math.max(1, asciiPreviewLayout.implicitWidth), (parent.height - Style.space(8)) / Math.max(1, asciiPreviewLayout.implicitHeight)))
+                transformOrigin: Item.Center
 
                 ColumnLayout {
-                  id: previewPro
+                  id: asciiPreviewLayout
                   anchors.centerIn: parent
-                  visible: !root.isAsciiFont
-                  spacing: Style.space(2)
+                  spacing: Style.space(4)
 
                   Text {
                     Layout.alignment: Qt.AlignHCenter
-                    text: root.customText
-                    color: Color.accent
-                    font.family: root.fontFamilyFor(root.textFont)
-                    font.pixelSize: 15
-                    font.bold: true
-                    font.letterSpacing: (root.textFont === "mono" || root.textFont === "condensed") ? 4 : 2
+                    text: root.renderedAscii || root.customText
+                    color: (root.tintMode === "theme-accent") ? Color.accent : ((root.tintMode === "theme-fg") ? Color.foreground : (root.customColor || "#ffffff"))
+                    font.family: Style.fontMonospace ? Style.fontMonospace.family : "monospace"
+                    font.pixelSize: 10
+                    lineHeight: 0.95
                     horizontalAlignment: Text.AlignHCenter
                   }
 
@@ -656,11 +598,53 @@ Panel {
                     Layout.alignment: Qt.AlignHCenter
                     visible: root.customSubtext.length > 0
                     text: root.customSubtext
-                    color: Color.accent
-                    opacity: 0.75
+                    color: (root.tintMode === "theme-accent") ? Color.accent : ((root.tintMode === "theme-fg") ? Color.foreground : (root.customColor || "#ffffff"))
+                    opacity: 0.8
                     font.family: Style.fontRegular ? Style.fontRegular.family : "sans-serif"
-                    font.pixelSize: 9
+                    font.pixelSize: 11
                     font.letterSpacing: 2
+                    font.capitalization: Font.AllUppercase
+                    horizontalAlignment: Text.AlignHCenter
+                  }
+                }
+              }
+
+              // Pro Typography Preview
+              Item {
+                anchors.centerIn: parent
+                visible: !root.isAsciiFont
+                width: proPreviewLayout.implicitWidth
+                height: proPreviewLayout.implicitHeight
+                scale: Math.min(1.0, Math.min((parent.width - Style.space(8)) / Math.max(1, proPreviewLayout.implicitWidth), (parent.height - Style.space(8)) / Math.max(1, proPreviewLayout.implicitHeight)))
+                transformOrigin: Item.Center
+
+                ColumnLayout {
+                  id: proPreviewLayout
+                  anchors.centerIn: parent
+                  spacing: Style.space(4)
+
+                  Text {
+                    Layout.alignment: Qt.AlignHCenter
+                    text: root.customText
+                    color: (root.tintMode === "theme-accent") ? Color.accent : ((root.tintMode === "theme-fg") ? Color.foreground : (root.customColor || "#ffffff"))
+                    font.family: root.fontFamilyFor(root.textFont)
+                    font.pixelSize: 20
+                    font.bold: true
+                    font.letterSpacing: (root.textFont === "mono" || root.textFont === "condensed") ? 4 : 2
+                    font.capitalization: (root.textFont === "condensed" || root.textFont === "display") ? Font.AllUppercase : Font.MixedCase
+                    horizontalAlignment: Text.AlignHCenter
+                  }
+
+                  Text {
+                    Layout.alignment: Qt.AlignHCenter
+                    visible: root.customSubtext.length > 0
+                    text: root.customSubtext
+                    color: (root.tintMode === "theme-accent") ? Color.accent : ((root.tintMode === "theme-fg") ? Color.foreground : (root.customColor || "#ffffff"))
+                    opacity: 0.8
+                    font.family: Style.fontRegular ? Style.fontRegular.family : "sans-serif"
+                    font.pixelSize: 11
+                    font.letterSpacing: 2
+                    font.capitalization: Font.AllUppercase
                     horizontalAlignment: Text.AlignHCenter
                   }
                 }
