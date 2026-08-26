@@ -96,7 +96,8 @@ DEFAULTS = {
 
 
 def render_ascii_art(text: str, font: str) -> str:
-    if not text.strip():
+    text = (text or "").strip()[:100]  # Cap input text length to prevent DoS
+    if not text:
         return ""
     try:
         import pyfiglet
@@ -119,7 +120,7 @@ def render_ascii_art(text: str, font: str) -> str:
 
 
 def load_config() -> dict:
-    STATE_DIR.mkdir(parents=True, exist_ok=True)
+    STATE_DIR.mkdir(parents=True, exist_ok=True, mode=0o700)
     if CONFIG_FILE.exists():
         try:
             with open(CONFIG_FILE, "r", encoding="utf-8") as f:
@@ -134,8 +135,32 @@ def load_config() -> dict:
 
 
 def save_config(cfg: dict):
-    STATE_DIR.mkdir(parents=True, exist_ok=True)
+    STATE_DIR.mkdir(parents=True, exist_ok=True, mode=0o700)
+    
+    # Boundary and type sanitization
+    preset_ids = [p["id"] for p in PRESETS]
+    font_ids = [f["id"] for f in FONTS]
+    
+    if cfg.get("preset") not in preset_ids:
+        cfg["preset"] = "omarchy"
+    if cfg.get("position") not in POSITIONS:
+        cfg["position"] = "center"
+    if cfg.get("tintMode") not in TINT_MODES:
+        cfg["tintMode"] = "theme-accent"
+        
+    try:
+        cfg["size"] = max(32, min(1000, int(cfg.get("size", 280))))
+        cfg["opacity"] = max(0, min(100, int(cfg.get("opacity", 30))))
+        cfg["margin"] = max(0, min(500, int(cfg.get("margin", 48))))
+        cfg["rotation"] = max(-180, min(180, int(cfg.get("rotation", 0))))
+    except (ValueError, TypeError):
+        pass
+
     font_id = cfg.get("textFont", "modern-sans")
+    if font_id not in font_ids:
+        font_id = "modern-sans"
+        cfg["textFont"] = font_id
+
     ascii_ids = [f["id"] for f in FONTS if f["type"] == "ascii"]
     if font_id in ascii_ids:
         cfg["renderedAscii"] = render_ascii_art(cfg.get("customText", "OMARCHY"), font_id)
@@ -145,6 +170,7 @@ def save_config(cfg: dict):
     tmp = CONFIG_FILE.with_suffix(".tmp")
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(cfg, f, indent=2)
+    os.chmod(tmp, 0o600)
     tmp.replace(CONFIG_FILE)
 
 

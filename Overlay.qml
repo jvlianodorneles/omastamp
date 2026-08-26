@@ -308,11 +308,13 @@ Item {
           // -------------------------------------------------------
           // Content 1: Preset Vector SVG
           // -------------------------------------------------------
+          readonly property string safePresetId: (/^[a-zA-Z0-9_-]+$/.test(root.presetId)) ? root.presetId : "omarchy"
+
           Image {
             id: presetImage
             anchors.fill: parent
             visible: root.mode === "preset"
-            source: root.mode === "preset" ? Qt.resolvedUrl("assets/logos/" + root.presetId + ".svg") : ""
+            source: root.mode === "preset" ? Qt.resolvedUrl("assets/logos/" + stampItem.safePresetId + ".svg") : ""
             sourceSize.width: root.stampSize
             sourceSize.height: root.stampSize
             fillMode: Image.PreserveAspectFit
