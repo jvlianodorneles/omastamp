@@ -20,6 +20,8 @@ BarWidget {
   readonly property bool opened: panelLoader.item ? panelLoader.item.opened === true : false
   readonly property bool popoutSwitchClosing: panelLoader.item ? panelLoader.item.popoutSwitchClosing === true : false
 
+  readonly property int maxConfigBytes: 65536
+
   FileView {
     id: configFile
     path: root.stateFilePath
@@ -29,9 +31,9 @@ BarWidget {
     onLoaded: {
       try {
         var raw = text()
-        if (raw && raw.trim().length > 0) {
+        if (raw && raw.length <= root.maxConfigBytes && raw.trim().length > 0) {
           var cfg = JSON.parse(raw)
-          if (cfg) {
+          if (cfg && typeof cfg === "object") {
             if (cfg.enabled !== undefined) root.stampEnabled = Boolean(cfg.enabled)
             if (cfg.mode !== undefined) root.currentMode = String(cfg.mode)
             if (cfg.preset !== undefined) root.currentPreset = String(cfg.preset)
@@ -46,7 +48,9 @@ BarWidget {
     root.stampEnabled = !root.stampEnabled
     try {
       var raw = configFile.text() || "{}"
+      if (raw.length > root.maxConfigBytes) raw = "{}"
       var cfg = JSON.parse(raw)
+      if (!cfg || typeof cfg !== "object") cfg = {}
       cfg.enabled = root.stampEnabled
       configFile.setText(JSON.stringify(cfg, null, 2) + "\n")
     } catch (e) {
@@ -61,7 +65,9 @@ BarWidget {
     root.currentMode = "preset"
     try {
       var raw = configFile.text() || "{}"
+      if (raw.length > root.maxConfigBytes) raw = "{}"
       var cfg = JSON.parse(raw)
+      if (!cfg || typeof cfg !== "object") cfg = {}
       cfg.mode = "preset"
       cfg.preset = next
       configFile.setText(JSON.stringify(cfg, null, 2) + "\n")

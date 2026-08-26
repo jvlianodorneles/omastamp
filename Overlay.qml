@@ -59,6 +59,8 @@ Item {
 
   readonly property bool applyColorization: (mode !== "text") && (tintMode !== "original")
 
+  readonly property int maxConfigBytes: 65536
+
   // Watch state.json for reactive updates across processes & CLI
   FileView {
     id: configFile
@@ -69,9 +71,9 @@ Item {
     onLoaded: {
       try {
         var raw = text()
-        if (raw && raw.trim().length > 0) {
+        if (raw && raw.length <= root.maxConfigBytes && raw.trim().length > 0) {
           var cfg = JSON.parse(raw)
-          if (cfg) {
+          if (cfg && typeof cfg === "object") {
             if (cfg.enabled !== undefined) root.stampEnabled = Boolean(cfg.enabled)
             if (cfg.mode !== undefined) root.mode = String(cfg.mode)
             if (cfg.preset !== undefined) root.presetId = String(cfg.preset)

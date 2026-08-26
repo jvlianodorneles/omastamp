@@ -55,25 +55,56 @@ fi
 
 if [ -n "$CHOSEN" ] && [ -f "$CHOSEN" ]; then
   CHOSEN_PATH=$(realpath "$CHOSEN")
-  python3 -c "
-import json, os
-cfg_path = '$CONFIG_FILE'
+  python3 -c '
+import json, os, sys, tempfile
+
+cfg_path = sys.argv[1]
+chosen_path = sys.argv[2]
+
+data = {}
+if os.path.exists(cfg_path) and not os.path.islink(cfg_path):
+    try:
+        if os.path.getsize(cfg_path) <= 65536:
+            with open(cfg_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if not isinstance(data, dict):
+                    data = {}
+    except Exception:
+        data = {}
+
+data["mode"] = "image"
+data["customImagePath"] = chosen_path
+data["enabled"] = True
+
+dir_name = os.path.dirname(cfg_path)
+os.makedirs(dir_name, mode=0o700, exist_ok=True)
+tmp_file = tempfile.NamedTemporaryFile(
+    mode="w",
+    dir=dir_name,
+    prefix="config-",
+    suffix=".tmp",
+    delete=False,
+    encoding="utf-8"
+)
+tmp_path = tmp_file.name
 try:
-    with open(cfg_path, 'r') as f:
-        data = json.load(f)
+    json.dump(data, tmp_file, indent=2)
+    tmp_file.write("\n")
+    tmp_file.flush()
+    os.fsync(tmp_file.fileno())
+    tmp_file.close()
+    os.chmod(tmp_path, 0o600)
+    os.replace(tmp_path, cfg_path)
 except Exception:
-    data = {}
+    if os.path.exists(tmp_path):
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+    raise
 
-data['mode'] = 'image'
-data['customImagePath'] = '$CHOSEN_PATH'
-data['enabled'] = True
-
-tmp = cfg_path + '.tmp'
-with open(tmp, 'w') as f:
-    json.dump(data, f, indent=2)
-os.replace(tmp, cfg_path)
-print('✓ Selected image:', '$CHOSEN_PATH')
-"
+print("✓ Selected image:", chosen_path)
+' "$CONFIG_FILE" "$CHOSEN_PATH"
   echo "$CHOSEN_PATH"
   exit 0
 fi

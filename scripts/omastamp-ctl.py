@@ -10,10 +10,12 @@ import json
 import shutil
 import subprocess
 import argparse
+import tempfile
 from pathlib import Path
 
 STATE_DIR = Path.home() / ".local" / "state" / "omarchy" / "omastamp"
 CONFIG_FILE = STATE_DIR / "config.json"
+MAX_CONFIG_SIZE = 65536  # 64 KB ceiling
 
 PRESETS = [
     {"id": "omarchy", "name": "Omarchy Mark", "desc": "Authentic geometric square monogram"},
@@ -121,13 +123,15 @@ def render_ascii_art(text: str, font: str) -> str:
 
 def load_config() -> dict:
     STATE_DIR.mkdir(parents=True, exist_ok=True, mode=0o700)
-    if CONFIG_FILE.exists():
+    if CONFIG_FILE.exists() and not CONFIG_FILE.is_symlink():
         try:
-            with open(CONFIG_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
-                merged = dict(DEFAULTS)
-                merged.update(data)
-                return merged
+            if CONFIG_FILE.stat().st_size <= MAX_CONFIG_SIZE:
+                with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    if isinstance(data, dict):
+                        merged = dict(DEFAULTS)
+                        merged.update(data)
+                        return merged
         except Exception:
             pass
     save_config(DEFAULTS)
@@ -167,11 +171,31 @@ def save_config(cfg: dict):
     else:
         cfg["renderedAscii"] = ""
 
-    tmp = CONFIG_FILE.with_suffix(".tmp")
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(cfg, f, indent=2)
-    os.chmod(tmp, 0o600)
-    tmp.replace(CONFIG_FILE)
+    # Atomic write using secure temporary file with unpredictable name and no symlink following
+    tmp_file = tempfile.NamedTemporaryFile(
+        mode="w",
+        dir=STATE_DIR,
+        prefix="config-",
+        suffix=".tmp",
+        delete=False,
+        encoding="utf-8"
+    )
+    tmp_path = Path(tmp_file.name)
+    try:
+        json.dump(cfg, tmp_file, indent=2)
+        tmp_file.write("\n")
+        tmp_file.flush()
+        os.fsync(tmp_file.fileno())
+        tmp_file.close()
+        os.chmod(tmp_path, 0o600)
+        tmp_path.replace(CONFIG_FILE)
+    except Exception:
+        if tmp_path.exists():
+            try:
+                tmp_path.unlink()
+            except OSError:
+                pass
+        raise
 
 
 def browse_image():
