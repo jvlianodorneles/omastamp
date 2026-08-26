@@ -1,5 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" fill="#ffffff">
-  <!-- Omarchy Signature Geometric Monogram Mark -->
-  <path fill-rule="evenodd" clip-rule="evenodd" d="M 30,30 H 210 V 210 H 30 Z M 60,60 V 180 H 180 V 60 Z M 90,90 H 150 V 150 H 90 Z" />
-  <rect x="105" y="105" width="30" height="30" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" fill="#ffffff">
+  <!-- Official Omarchy Geometric Monogram -->
+  <!-- Central Square Core -->
+  <rect x="60" y="60" width="180" height="180" />
+  <!-- Top-Left Segment -->
+  <path d="M 20,20 H 140 V 40 H 40 V 140 H 20 Z" />
+  <!-- Bottom-Left Segment -->
+  <path d="M 20,160 H 40 V 260 H 140 V 280 H 20 Z" />
+  <!-- Top-Right, Right Edge, Hook and Bottom Tail Segment -->
+  <path d="M 160,20 H 280 V 280 H 160 V 300 H 180 V 260 H 260 V 40 H 220 V 60 H 160 Z" />
 </svg>
