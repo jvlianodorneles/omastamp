@@ -88,7 +88,6 @@ DEFAULTS = {
     "showShadow": False,
     "customImagePath": "",
     "customText": "OMARCHY",
-    "customSubtext": "",
     "textFont": "modern-sans",
     "renderedAscii": "",
     "primaryScreenOnly": False,
@@ -246,9 +245,8 @@ def main():
     subparsers.add_parser("pick", help="Open graphical file dialog to select image")
 
     # custom text
-    p_txt = subparsers.add_parser("set-text", help="Set custom text / monogram")
+    p_txt = subparsers.add_parser("set-text", help="Set custom text / watermark")
     p_txt.add_argument("text", help="Main watermark text string")
-    p_txt.add_argument("subtext", nargs="?", default="", help="Optional subtext tagline")
     p_txt.add_argument("--font", dest="font", choices=[f["id"] for f in FONTS], help="Typography or ASCII font style")
 
     p_font = subparsers.add_parser("set-font", help="Set watermark text font style")
@@ -415,8 +413,6 @@ def main():
     if args.command == "set-text":
         cfg["mode"] = "text"
         cfg["customText"] = args.text
-        if args.subtext:
-            cfg["customSubtext"] = args.subtext
         if args.font:
             cfg["textFont"] = args.font
         save_config(cfg)

@@ -27,7 +27,6 @@ Item {
   property bool showShadow: false
   property string customImagePath: ""
   property string customText: "OMARCHY"
-  property string customSubtext: ""
   property string textFont: "modern-sans"
   property string renderedAscii: ""
   property bool primaryScreenOnly: false
@@ -88,7 +87,6 @@ Item {
             if (cfg.showShadow !== undefined) root.showShadow = Boolean(cfg.showShadow)
             if (cfg.customImagePath !== undefined) root.customImagePath = String(cfg.customImagePath)
             if (cfg.customText !== undefined) root.customText = String(cfg.customText)
-            if (cfg.customSubtext !== undefined) root.customSubtext = String(cfg.customSubtext)
             if (cfg.textFont !== undefined) root.textFont = String(cfg.textFont)
             if (cfg.renderedAscii !== undefined) root.renderedAscii = String(cfg.renderedAscii)
             if (cfg.primaryScreenOnly !== undefined) root.primaryScreenOnly = Boolean(cfg.primaryScreenOnly)
@@ -120,7 +118,6 @@ Item {
       "showShadow": root.showShadow,
       "customImagePath": root.customImagePath,
       "customText": root.customText,
-      "customSubtext": root.customSubtext,
       "textFont": root.textFont,
       "renderedAscii": root.renderedAscii,
       "primaryScreenOnly": root.primaryScreenOnly
@@ -242,7 +239,7 @@ Item {
             : root.stampSize
 
           readonly property real baseHeight: (root.mode === "text")
-            ? Math.max(root.stampSize * 0.35, textLayout.implicitHeight)
+            ? Math.max(root.stampSize * 0.3, textLayout.implicitHeight)
             : ((root.mode === "preset" && root.presetId === "omarchy-text")
                 ? Math.round(root.stampSize * 0.28)
                 : root.stampSize)
@@ -347,77 +344,37 @@ Item {
             id: textLayout
             anchors.centerIn: parent
             visible: root.mode === "text"
-            implicitWidth: root.isAsciiFont ? asciiLayout.implicitWidth : proTextLayout.implicitWidth
-            implicitHeight: root.isAsciiFont ? asciiLayout.implicitHeight : proTextLayout.implicitHeight
+            implicitWidth: root.isAsciiFont ? asciiText.implicitWidth : mainText.implicitWidth
+            implicitHeight: root.isAsciiFont ? asciiText.implicitHeight : mainText.implicitHeight
             width: implicitWidth
             height: implicitHeight
 
-            // ASCII Art Text Watermark (using pyfiglet like OmaSaver) + Subtext Tagline
-            ColumnLayout {
-              id: asciiLayout
+            // ASCII Art Text Watermark (using pyfiglet like OmaSaver)
+            Text {
+              id: asciiText
               anchors.centerIn: parent
               visible: root.isAsciiFont
-              spacing: Style.space(4)
-
-              Text {
-                id: asciiText
-                Layout.alignment: Qt.AlignHCenter
-                text: root.renderedAscii || root.customText
-                color: root.resolvedTintColor
-                font.family: Style.fontMonospace ? Style.fontMonospace.family : "monospace"
-                font.pixelSize: Math.max(7, Math.round(root.stampSize * 0.045))
-                lineHeight: 0.95
-                horizontalAlignment: Text.AlignHCenter
-              }
-
-              Text {
-                id: asciiSubText
-                Layout.alignment: Qt.AlignHCenter
-                visible: root.customSubtext.length > 0
-                text: root.customSubtext
-                color: root.resolvedTintColor
-                opacity: 0.8
-                font.family: Style.fontRegular ? Style.fontRegular.family : "sans-serif"
-                font.pixelSize: Math.max(10, Math.round(root.stampSize * 0.07))
-                font.letterSpacing: 3
-                font.capitalization: Font.AllUppercase
-                horizontalAlignment: Text.AlignHCenter
-              }
+              text: root.renderedAscii || root.customText
+              color: root.resolvedTintColor
+              font.family: Style.fontMonospace ? Style.fontMonospace.family : "monospace"
+              font.pixelSize: Math.max(7, Math.round(root.stampSize * 0.045))
+              lineHeight: 0.95
+              horizontalAlignment: Text.AlignHCenter
             }
 
-            // Pro Typography Text Watermark (Main Title + Subtext Tagline)
-            ColumnLayout {
-              id: proTextLayout
+            // Pro Typography Text Watermark (Main Title only)
+            Text {
+              id: mainText
               anchors.centerIn: parent
               visible: !root.isAsciiFont
-              spacing: Style.space(6)
-
-              Text {
-                id: mainText
-                Layout.alignment: Qt.AlignHCenter
-                text: root.customText
-                color: root.resolvedTintColor
-                font.family: root.fontFamilyFor(root.textFont)
-                font.pixelSize: Math.max(16, Math.round(root.stampSize * 0.22))
-                font.bold: true
-                font.letterSpacing: (root.textFont === "mono" || root.textFont === "condensed") ? 6 : 4
-                font.capitalization: (root.textFont === "condensed" || root.textFont === "display") ? Font.AllUppercase : Font.MixedCase
-                horizontalAlignment: Text.AlignHCenter
-              }
-
-              Text {
-                id: subText
-                Layout.alignment: Qt.AlignHCenter
-                visible: root.customSubtext.length > 0
-                text: root.customSubtext
-                color: root.resolvedTintColor
-                opacity: 0.8
-                font.family: Style.fontRegular ? Style.fontRegular.family : "sans-serif"
-                font.pixelSize: Math.max(10, Math.round(root.stampSize * 0.08))
-                font.letterSpacing: 3
-                font.capitalization: Font.AllUppercase
-                horizontalAlignment: Text.AlignHCenter
-              }
+              text: root.customText
+              color: root.resolvedTintColor
+              font.family: root.fontFamilyFor(root.textFont)
+              font.pixelSize: Math.max(16, Math.round(root.stampSize * 0.22))
+              font.bold: true
+              font.letterSpacing: (root.textFont === "mono" || root.textFont === "condensed") ? 6 : 4
+              font.capitalization: (root.textFont === "condensed" || root.textFont === "display") ? Font.AllUppercase : Font.MixedCase
+              horizontalAlignment: Text.AlignHCenter
             }
           }
         }

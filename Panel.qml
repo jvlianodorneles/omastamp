@@ -37,7 +37,6 @@ Panel {
   property bool showShadow: false
   property string customImagePath: ""
   property string customText: "OMARCHY"
-  property string customSubtext: ""
   property string textFont: "modern-sans"
   property string renderedAscii: ""
   property bool primaryScreenOnly: false
@@ -137,7 +136,6 @@ Panel {
             if (cfg.showShadow !== undefined) root.showShadow = Boolean(cfg.showShadow)
             if (cfg.customImagePath !== undefined) root.customImagePath = String(cfg.customImagePath)
             if (cfg.customText !== undefined) root.customText = String(cfg.customText)
-            if (cfg.customSubtext !== undefined) root.customSubtext = String(cfg.customSubtext)
             if (cfg.textFont !== undefined) root.textFont = String(cfg.textFont)
             if (cfg.renderedAscii !== undefined) root.renderedAscii = String(cfg.renderedAscii)
             if (cfg.primaryScreenOnly !== undefined) root.primaryScreenOnly = Boolean(cfg.primaryScreenOnly)
@@ -165,7 +163,6 @@ Panel {
       "showShadow": root.showShadow,
       "customImagePath": root.customImagePath,
       "customText": root.customText,
-      "customSubtext": root.customSubtext,
       "textFont": root.textFont,
       "renderedAscii": root.renderedAscii,
       "primaryScreenOnly": root.primaryScreenOnly
@@ -175,7 +172,7 @@ Panel {
 
   function updateTextSettings() {
     root.saveConfig()
-    Util.execDetached("omastamp set-text " + Util.shellQuote(root.customText) + " " + Util.shellQuote(root.customSubtext) + " --font " + Util.shellQuote(root.textFont))
+    Util.execDetached("omastamp set-text " + Util.shellQuote(root.customText) + " --font " + Util.shellQuote(root.textFont))
   }
 
   function resetDefaults() {
@@ -194,7 +191,6 @@ Panel {
     root.showShadow = false
     root.customImagePath = ""
     root.customText = "OMARCHY"
-    root.customSubtext = ""
     root.textFont = "modern-sans"
     root.renderedAscii = ""
     root.primaryScreenOnly = false
@@ -487,56 +483,30 @@ Panel {
         }
 
         // -------------------------------------------------------------
-        // Content 3: Watermark Text Inputs & Font Dropdown
+        // Content 3: Watermark Text Input & Font Dropdown
         // -------------------------------------------------------------
         ColumnLayout {
           Layout.fillWidth: true
           visible: root.mode === "text"
           spacing: Style.space(8)
 
-          RowLayout {
+          ColumnLayout {
             Layout.fillWidth: true
-            spacing: Style.space(6)
+            spacing: Style.space(2)
 
-            ColumnLayout {
-              Layout.fillWidth: true
-              spacing: Style.space(2)
-
-              Text {
-                text: "Main Title / Monogram:"
-                font.pixelSize: 10
-                color: Color.foreground
-              }
-
-              TextField {
-                Layout.fillWidth: true
-                text: root.customText
-                placeholderText: "e.g. OMARCHY"
-                onEditingFinished: {
-                  root.customText = text.trim()
-                  root.updateTextSettings()
-                }
-              }
+            Text {
+              text: "Watermark Text / Wordmark:"
+              font.pixelSize: 10
+              color: Color.foreground
             }
 
-            ColumnLayout {
+            TextField {
               Layout.fillWidth: true
-              spacing: Style.space(2)
-
-              Text {
-                text: "Subtext / Slogan:"
-                font.pixelSize: 10
-                color: Color.foreground
-              }
-
-              TextField {
-                Layout.fillWidth: true
-                text: root.customSubtext
-                placeholderText: "e.g. ARCH LINUX"
-                onEditingFinished: {
-                  root.customSubtext = text.trim()
-                  root.updateTextSettings()
-                }
+              text: root.customText
+              placeholderText: "e.g. OMARCHY"
+              onEditingFinished: {
+                root.customText = text.trim()
+                root.updateTextSettings()
               }
             }
           }
@@ -574,38 +544,20 @@ Panel {
               Item {
                 anchors.centerIn: parent
                 visible: root.isAsciiFont
-                width: asciiPreviewLayout.implicitWidth
-                height: asciiPreviewLayout.implicitHeight
-                scale: Math.min(1.0, Math.min((parent.width - Style.space(8)) / Math.max(1, asciiPreviewLayout.implicitWidth), (parent.height - Style.space(8)) / Math.max(1, asciiPreviewLayout.implicitHeight)))
+                width: previewAsciiText.implicitWidth
+                height: previewAsciiText.implicitHeight
+                scale: Math.min(1.0, Math.min((parent.width - Style.space(8)) / Math.max(1, previewAsciiText.implicitWidth), (parent.height - Style.space(8)) / Math.max(1, previewAsciiText.implicitHeight)))
                 transformOrigin: Item.Center
 
-                ColumnLayout {
-                  id: asciiPreviewLayout
+                Text {
+                  id: previewAsciiText
                   anchors.centerIn: parent
-                  spacing: Style.space(4)
-
-                  Text {
-                    Layout.alignment: Qt.AlignHCenter
-                    text: root.renderedAscii || root.customText
-                    color: (root.tintMode === "theme-accent") ? Color.accent : ((root.tintMode === "theme-fg") ? Color.foreground : (root.customColor || "#ffffff"))
-                    font.family: Style.fontMonospace ? Style.fontMonospace.family : "monospace"
-                    font.pixelSize: 10
-                    lineHeight: 0.95
-                    horizontalAlignment: Text.AlignHCenter
-                  }
-
-                  Text {
-                    Layout.alignment: Qt.AlignHCenter
-                    visible: root.customSubtext.length > 0
-                    text: root.customSubtext
-                    color: (root.tintMode === "theme-accent") ? Color.accent : ((root.tintMode === "theme-fg") ? Color.foreground : (root.customColor || "#ffffff"))
-                    opacity: 0.8
-                    font.family: Style.fontRegular ? Style.fontRegular.family : "sans-serif"
-                    font.pixelSize: 11
-                    font.letterSpacing: 2
-                    font.capitalization: Font.AllUppercase
-                    horizontalAlignment: Text.AlignHCenter
-                  }
+                  text: root.renderedAscii || root.customText
+                  color: (root.tintMode === "theme-accent") ? Color.accent : ((root.tintMode === "theme-fg") ? Color.foreground : (root.customColor || "#ffffff"))
+                  font.family: Style.fontMonospace ? Style.fontMonospace.family : "monospace"
+                  font.pixelSize: 10
+                  lineHeight: 0.95
+                  horizontalAlignment: Text.AlignHCenter
                 }
               }
 
@@ -613,40 +565,22 @@ Panel {
               Item {
                 anchors.centerIn: parent
                 visible: !root.isAsciiFont
-                width: proPreviewLayout.implicitWidth
-                height: proPreviewLayout.implicitHeight
-                scale: Math.min(1.0, Math.min((parent.width - Style.space(8)) / Math.max(1, proPreviewLayout.implicitWidth), (parent.height - Style.space(8)) / Math.max(1, proPreviewLayout.implicitHeight)))
+                width: previewProText.implicitWidth
+                height: previewProText.implicitHeight
+                scale: Math.min(1.0, Math.min((parent.width - Style.space(8)) / Math.max(1, previewProText.implicitWidth), (parent.height - Style.space(8)) / Math.max(1, previewProText.implicitHeight)))
                 transformOrigin: Item.Center
 
-                ColumnLayout {
-                  id: proPreviewLayout
+                Text {
+                  id: previewProText
                   anchors.centerIn: parent
-                  spacing: Style.space(4)
-
-                  Text {
-                    Layout.alignment: Qt.AlignHCenter
-                    text: root.customText
-                    color: (root.tintMode === "theme-accent") ? Color.accent : ((root.tintMode === "theme-fg") ? Color.foreground : (root.customColor || "#ffffff"))
-                    font.family: root.fontFamilyFor(root.textFont)
-                    font.pixelSize: 20
-                    font.bold: true
-                    font.letterSpacing: (root.textFont === "mono" || root.textFont === "condensed") ? 4 : 2
-                    font.capitalization: (root.textFont === "condensed" || root.textFont === "display") ? Font.AllUppercase : Font.MixedCase
-                    horizontalAlignment: Text.AlignHCenter
-                  }
-
-                  Text {
-                    Layout.alignment: Qt.AlignHCenter
-                    visible: root.customSubtext.length > 0
-                    text: root.customSubtext
-                    color: (root.tintMode === "theme-accent") ? Color.accent : ((root.tintMode === "theme-fg") ? Color.foreground : (root.customColor || "#ffffff"))
-                    opacity: 0.8
-                    font.family: Style.fontRegular ? Style.fontRegular.family : "sans-serif"
-                    font.pixelSize: 11
-                    font.letterSpacing: 2
-                    font.capitalization: Font.AllUppercase
-                    horizontalAlignment: Text.AlignHCenter
-                  }
+                  text: root.customText
+                  color: (root.tintMode === "theme-accent") ? Color.accent : ((root.tintMode === "theme-fg") ? Color.foreground : (root.customColor || "#ffffff"))
+                  font.family: root.fontFamilyFor(root.textFont)
+                  font.pixelSize: 22
+                  font.bold: true
+                  font.letterSpacing: (root.textFont === "mono" || root.textFont === "condensed") ? 4 : 2
+                  font.capitalization: (root.textFont === "condensed" || root.textFont === "display") ? Font.AllUppercase : Font.MixedCase
+                  horizontalAlignment: Text.AlignHCenter
                 }
               }
             }
