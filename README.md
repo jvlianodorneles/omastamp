@@ -42,6 +42,54 @@
 
 ---
 
+## 🎨 Customizing & Adding Preset Insignias
+
+You can easily add your own vector logos, community crests, or custom insignias to the preset collection:
+
+### 1. Vector Format Best Practices
+For your SVG to support **dynamic theme tinting** (adapting automatically to your Omarchy color palette, accent color, and custom hex tints):
+- Use **pure white (`#ffffff`)** for fills and strokes: `fill="#ffffff"` or `stroke="#ffffff"`.
+- Use square viewports when possible (e.g. `viewBox="0 0 100 100"` or `viewBox="0 0 512 512"`).
+- Remove static background rectangles so transparency is preserved.
+
+### 2. Adding the SVG File
+Place your SVG file into the logos directory:
+```bash
+cp my-custom-crest.svg assets/logos/my-custom-crest.svg
+```
+
+### 3. Registering the Preset in Code
+To make your new insignia appear in the **OmaStamp Studio** grid and CLI cycle list:
+
+1. **In [`Panel.qml`](Panel.qml)**, add an entry to `presetsList`:
+   ```qml
+   readonly property var presetsList: [
+     { id: "my-custom-crest", name: "My Crest", icon: "assets/logos/my-custom-crest.svg" },
+     // ... existing presets
+   ]
+   ```
+
+2. **In [`scripts/omastamp-ctl.py`](scripts/omastamp-ctl.py)**, add an entry to `PRESETS`:
+   ```python
+   PRESETS = [
+       {"id": "my-custom-crest", "name": "My Crest", "desc": "Custom vector insignia"},
+       # ... existing presets
+   ]
+   ```
+
+3. **Reinstall to apply**:
+   ```bash
+   ./install.sh
+   ```
+
+> 💡 **No-Code Alternative (Custom Image Mode)**:  
+> If you don't want to edit files, you can instantly stamp any image or SVG without registering it as a preset. Simply open **OmaStamp Studio → Custom Image → Browse...** or run:
+> ```bash
+> omastamp set-image ~/Pictures/my-custom-crest.svg
+> ```
+
+---
+
 ## 🚀 CLI Commands
 
 ```bash
