@@ -123,12 +123,12 @@ BarWidget {
     function cycle(): void { root.cyclePreset() }
   }
 
-  // Status Bar Button with Stamp icon (\udb83\ude62 = 󰹢)
+  // Status Bar Button with Postal Stamp icon (\udb83\ude62 = 󰹢)
   WidgetButton {
     id: button
     anchors.fill: parent
     bar: root.bar
-    text: (root.showLabelSetting && button.bar && !button.bar.vertical) ? "\udb83\ude62 Stamp" : "\udb83\ude62"
+    text: "\udb83\ude62"
     active: root.opened
     fontSize: Style.bar.iconFont
     dimmed: !root.stampEnabled

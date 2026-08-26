@@ -5,6 +5,7 @@
   "version": "1.0.0",
   "author": "Dorneles",
   "license": "MIT",
+  "icon": "assets/icon.svg",
   "description": "Overlay and stamp custom logos, vector crests, and typographic watermarks directly over the desktop background wallpaper.",
   "keywords": [
     "stamp",
@@ -27,6 +28,7 @@
   },
   "barWidget": {
     "displayName": "OmaStamp",
+    "icon": "assets/icon.svg",
     "description": "Desktop background logo and watermark stamp studio",
     "category": "Customization",
     "allowMultiple": false,
@@ -47,9 +49,9 @@
       "showShadow": false,
       "customImagePath": "",
       "customText": "OMARCHY",
-      "customSubtext": "",
+      "textFont": "modern-sans",
       "primaryScreenOnly": false,
-      "showLabel": true
+      "showLabel": false
     },
     "schema": [
       {
@@ -192,11 +194,11 @@
         "description": "Text displayed when mode is set to 'text'."
       },
       {
-        "key": "customSubtext",
+        "key": "textFont",
         "type": "string",
-        "label": "Watermark Subtext",
-        "defaultValue": "",
-        "description": "Optional secondary tagline displayed underneath text."
+        "label": "Watermark Font Style",
+        "defaultValue": "modern-sans",
+        "description": "Font family or ASCII style."
       },
       {
         "key": "primaryScreenOnly",
@@ -204,13 +206,6 @@
         "label": "Primary Screen Only",
         "defaultValue": false,
         "description": "Show stamp only on the main display instead of all connected monitors."
-      },
-      {
-        "key": "showLabel",
-        "type": "boolean",
-        "label": "Show Label on Top Bar",
-        "defaultValue": true,
-        "description": "Display 'OmaStamp' text next to the icon on the status bar."
       }
     ]
   }

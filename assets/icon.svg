@@ -1,11 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" fill="#ffffff">
-  <!-- Official Omarchy Geometric Monogram -->
-  <!-- Central Square Core -->
-  <rect x="60" y="60" width="180" height="180" />
-  <!-- Top-Left Segment -->
-  <path d="M 20,20 H 140 V 40 H 40 V 140 H 20 Z" />
-  <!-- Bottom-Left Segment -->
-  <path d="M 20,160 H 40 V 260 H 140 V 280 H 20 Z" />
-  <!-- Top-Right, Right Edge, Hook and Bottom Tail Segment -->
-  <path d="M 160,20 H 280 V 280 H 160 V 300 H 180 V 260 H 260 V 40 H 220 V 60 H 160 Z" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Postage Stamp Perforated Border -->
+  <path fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" d="
+    M 14,14
+    H 22 A 4,4 0 0 0 30,14 H 38 A 4,4 0 0 0 46,14 H 54 A 4,4 0 0 0 62,14 H 70 A 4,4 0 0 0 78,14 H 86
+    V 22 A 4,4 0 0 0 86,30 V 38 A 4,4 0 0 0 86,46 V 54 A 4,4 0 0 0 86,62 V 70 A 4,4 0 0 0 86,78 V 86
+    H 78 A 4,4 0 0 0 70,86 H 62 A 4,4 0 0 0 54,86 H 46 A 4,4 0 0 0 38,86 H 30 A 4,4 0 0 0 22,86 H 14
+    V 78 A 4,4 0 0 0 14,70 V 62 A 4,4 0 0 0 14,54 V 46 A 4,4 0 0 0 14,38 V 30 A 4,4 0 0 0 14,22 V 14
+    Z
+    M 22,22
+    V 78
+    H 78
+    V 22
+    H 22
+    Z
+  "/>
+  <!-- Inner Postage Graphic: Center Starburst & Value Mark -->
+  <rect x="28" y="28" width="44" height="44" rx="4" fill="#ffffff" opacity="0.18" />
+  <path d="M 50,34 L 53.5,43.5 L 63.5,43.5 L 55.5,49 L 58.5,58.5 L 50,52.5 L 41.5,58.5 L 44.5,49 L 36.5,43.5 L 46.5,43.5 Z" fill="#ffffff" />
+  <rect x="34" y="63" width="32" height="3" rx="1.5" fill="#ffffff" opacity="0.8" />
 </svg>
