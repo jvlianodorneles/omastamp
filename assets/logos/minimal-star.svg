@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" fill="currentColor">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" fill="#ffffff">
   <!-- Minimalist 4-Point Starburst & Compass -->
   <path d="M150 15 C150 90 155 145 285 150 C155 155 150 210 150 285 C150 210 145 155 15 150 C145 145 150 90 150 15 Z"/>
-  <circle cx="150" cy="150" r="14" fill="#000" opacity="0.4"/>
+  <circle cx="150" cy="150" r="14" fill="#ffffff" opacity="0.4"/>
 </svg>

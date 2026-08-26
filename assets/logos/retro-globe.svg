@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" fill="none" stroke="currentColor" stroke-width="8">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" fill="none" stroke="#ffffff" stroke-width="8">
   <!-- Retro 80s Cyber Wireframe Globe -->
   <circle cx="150" cy="150" r="120" stroke-width="12"/>
   <ellipse cx="150" cy="150" rx="120" ry="40" stroke-width="8"/>

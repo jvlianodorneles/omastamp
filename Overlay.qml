@@ -43,10 +43,10 @@ Item {
     if (tintMode === "white") return "#ffffff"
     if (tintMode === "black") return "#000000"
     if (tintMode === "custom") return (customColor && customColor.length > 0) ? customColor : "#ffffff"
-    return "#ffffff"
+    return Color.accent
   }
 
-  readonly property bool applyColorization: tintMode !== "original" && mode !== "text"
+  readonly property bool applyColorization: (mode !== "text") && (tintMode !== "original")
 
   // Watch state.json for reactive updates across processes & CLI
   FileView {

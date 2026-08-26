@@ -1,10 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" fill="none" stroke="currentColor">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" fill="none" stroke="#ffffff">
   <!-- Code Terminal Developer Badge -->
   <rect x="25" y="40" width="250" height="220" rx="24" stroke-width="12" fill="none"/>
   <line x1="25" y1="95" x2="275" y2="95" stroke-width="10"/>
-  <circle cx="60" cy="68" r="8" fill="currentColor" stroke="none"/>
-  <circle cx="85" cy="68" r="8" fill="currentColor" stroke="none"/>
-  <circle cx="110" cy="68" r="8" fill="currentColor" stroke="none"/>
+  <circle cx="60" cy="68" r="8" fill="#ffffff" stroke="none"/>
+  <circle cx="85" cy="68" r="8" fill="#ffffff" stroke="none"/>
+  <circle cx="110" cy="68" r="8" fill="#ffffff" stroke="none"/>
   <polyline points="70,140 120,175 70,210" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
   <line x1="140" y1="210" x2="190" y2="210" stroke-width="14" stroke-linecap="round"/>
 </svg>

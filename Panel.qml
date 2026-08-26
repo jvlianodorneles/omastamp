@@ -66,12 +66,12 @@ Panel {
   ]
 
   readonly property var tintModesList: [
-    { id: "theme-accent", label: "Accent" },
-    { id: "theme-fg", label: "Text" },
-    { id: "original", label: "Original" },
-    { id: "white", label: "White" },
-    { id: "black", label: "Black" },
-    { id: "custom", label: "Custom" }
+    { id: "theme-accent", label: "Accent", color: Color.accent },
+    { id: "theme-fg", label: "Text", color: Color.foreground },
+    { id: "white", label: "White", color: "#ffffff" },
+    { id: "black", label: "Black", color: "#000000" },
+    { id: "original", label: "Original", color: "transparent" },
+    { id: "custom", label: "Custom", color: (root.customColor || "#ffffff") }
   ]
 
   // File watcher for real-time state synchronization
@@ -310,39 +310,53 @@ Panel {
                 required property int index
 
                 Layout.fillWidth: true
-                height: Style.space(56)
+                height: Style.space(64)
                 radius: Style.cornerRadius
+                clip: true
                 color: (root.presetId === modelData.id)
-                  ? Util.alpha(Color.accent, 0.2)
+                  ? Util.alpha(Color.accent, 0.22)
                   : (presetMouse.containsMouse ? Util.alpha(Color.foreground, 0.08) : Util.alpha(Color.popups.background, 0.6))
-                border.color: (root.presetId === modelData.id) ? Color.accent : Util.alpha(Color.popups.border, 0.4)
+                border.color: (root.presetId === modelData.id) ? Color.accent : Util.alpha(Color.popups.border, 0.45)
                 border.width: (root.presetId === modelData.id) ? 2 : 1
 
                 ColumnLayout {
-                  anchors.centerIn: parent
+                  anchors.fill: parent
+                  anchors.margins: Style.space(4)
                   spacing: Style.space(2)
 
-                  Image {
-                    Layout.alignment: Qt.AlignHCenter
-                    width: Style.space(24)
-                    height: Style.space(24)
-                    source: Qt.resolvedUrl(modelData.icon)
-                    sourceSize: Qt.size(24, 24)
-                    fillMode: Image.PreserveAspectFit
-                    layer.enabled: true
-                    layer.effect: MultiEffect {
-                      colorization: 1.0
-                      colorizationColor: (root.presetId === modelData.id) ? Color.accent : Color.foreground
+                  Item {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    clip: true
+
+                    Image {
+                      anchors.centerIn: parent
+                      width: Math.min(parent.width, Style.space(38))
+                      height: Math.min(parent.height, Style.space(26))
+                      source: Qt.resolvedUrl(modelData.icon)
+                      sourceSize: Qt.size(80, 80)
+                      fillMode: Image.PreserveAspectFit
+                      smooth: true
+                      mipmap: true
+                      opacity: (root.presetId === modelData.id) ? 1.0 : 0.85
+                      layer.enabled: true
+                      layer.effect: MultiEffect {
+                        colorization: 1.0
+                        colorizationColor: Color.accent
+                      }
                     }
                   }
 
                   Text {
-                    Layout.alignment: Qt.AlignHCenter
+                    Layout.fillWidth: true
                     text: modelData.name
                     font.family: Style.fontRegular ? Style.fontRegular.family : "sans-serif"
                     font.pixelSize: 9
+                    font.bold: root.presetId === modelData.id
                     color: (root.presetId === modelData.id) ? Color.accent : Color.foreground
+                    horizontalAlignment: Text.AlignHCenter
                     elide: Text.ElideRight
+                    maximumLineCount: 1
                   }
                 }
 
@@ -564,15 +578,50 @@ Panel {
 
               Repeater {
                 model: root.tintModesList
-                delegate: Button {
+                delegate: Rectangle {
+                  id: tintBtn
                   required property var modelData
                   Layout.fillWidth: true
-                  text: modelData.label
-                  selected: root.tintMode === modelData.id
-                  bordered: true
-                  onClicked: {
-                    root.tintMode = modelData.id
-                    root.saveConfig()
+                  height: Style.space(28)
+                  radius: Style.cornerRadius
+                  color: (root.tintMode === modelData.id)
+                    ? Util.alpha(Color.accent, 0.22)
+                    : (tintMouse.containsMouse ? Util.alpha(Color.foreground, 0.1) : Util.alpha(Color.popups.background, 0.6))
+                  border.color: (root.tintMode === modelData.id) ? Color.accent : Util.alpha(Color.popups.border, 0.45)
+                  border.width: (root.tintMode === modelData.id) ? 2 : 1
+
+                  RowLayout {
+                    anchors.centerIn: parent
+                    spacing: Style.space(5)
+
+                    Rectangle {
+                      visible: modelData.id !== "original"
+                      width: Style.space(8)
+                      height: Style.space(8)
+                      radius: width / 2
+                      color: (modelData.id === "custom") ? (root.customColor || "#ffffff") : modelData.color
+                      border.color: Util.alpha(Color.foreground, 0.3)
+                      border.width: 1
+                    }
+
+                    Text {
+                      text: modelData.label
+                      font.family: Style.fontRegular ? Style.fontRegular.family : "sans-serif"
+                      font.pixelSize: 11
+                      font.bold: root.tintMode === modelData.id
+                      color: (root.tintMode === modelData.id) ? Color.accent : Color.foreground
+                    }
+                  }
+
+                  MouseArea {
+                    id: tintMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                      root.tintMode = modelData.id
+                      root.saveConfig()
+                    }
                   }
                 }
               }

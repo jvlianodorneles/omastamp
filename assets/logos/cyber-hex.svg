@@ -1,13 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" fill="currentColor">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" fill="#ffffff">
   <!-- Cyberpunk Hexagonal Matrix & Circuit Emblem -->
-  <polygon points="150,20 262,85 262,215 150,280 38,215 38,85" fill="none" stroke="currentColor" stroke-width="14" stroke-linejoin="round"/>
-  <polygon points="150,55 232,102 232,198 150,245 68,198 68,102" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" opacity="0.6"/>
-  <polygon points="150,90 202,120 202,180 150,210 98,180 98,120" fill="currentColor" opacity="0.3"/>
-  <circle cx="150" cy="150" r="24" fill="currentColor"/>
-  <line x1="150" y1="20" x2="150" y2="90" stroke="currentColor" stroke-width="6"/>
-  <line x1="262" y1="85" x2="202" y2="120" stroke="currentColor" stroke-width="6"/>
-  <line x1="262" y1="215" x2="202" y2="180" stroke="currentColor" stroke-width="6"/>
-  <line x1="150" y1="280" x2="150" y2="210" stroke="currentColor" stroke-width="6"/>
-  <line x1="38" y1="215" x2="98" y2="180" stroke="currentColor" stroke-width="6"/>
-  <line x1="38" y1="85" x2="98" y2="120" stroke="currentColor" stroke-width="6"/>
+  <polygon points="150,20 262,85 262,215 150,280 38,215 38,85" fill="none" stroke="#ffffff" stroke-width="14" stroke-linejoin="round"/>
+  <polygon points="150,55 232,102 232,198 150,245 68,198 68,102" fill="none" stroke="#ffffff" stroke-width="6" stroke-linejoin="round" opacity="0.6"/>
+  <polygon points="150,90 202,120 202,180 150,210 98,180 98,120" fill="#ffffff" opacity="0.3"/>
+  <circle cx="150" cy="150" r="24" fill="#ffffff"/>
+  <line x1="150" y1="20" x2="150" y2="90" stroke="#ffffff" stroke-width="6"/>
+  <line x1="262" y1="85" x2="202" y2="120" stroke="#ffffff" stroke-width="6"/>
+  <line x1="262" y1="215" x2="202" y2="180" stroke="#ffffff" stroke-width="6"/>
+  <line x1="150" y1="280" x2="150" y2="210" stroke="#ffffff" stroke-width="6"/>
+  <line x1="38" y1="215" x2="98" y2="180" stroke="#ffffff" stroke-width="6"/>
+  <line x1="38" y1="85" x2="98" y2="120" stroke="#ffffff" stroke-width="6"/>
 </svg>
