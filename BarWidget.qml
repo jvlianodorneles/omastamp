@@ -10,7 +10,7 @@ BarWidget {
   id: root
   moduleName: "dorneles.omastamp"
 
-  readonly property string stateFilePath: Quickshell.env("HOME") + "/.local/state/omarchy/omastamp/config.json"
+  readonly property string stateDirPath: Quickshell.env("HOME") + "/.local/state/omarchy/omastamp"
 
   // Live state
   property bool stampEnabled: true
@@ -20,59 +20,53 @@ BarWidget {
   readonly property bool opened: panelLoader.item ? panelLoader.item.opened === true : false
   readonly property bool popoutSwitchClosing: panelLoader.item ? panelLoader.item.popoutSwitchClosing === true : false
 
-  readonly property int maxConfigBytes: 65536
+  function applyConfig(cfg) {
+    if (!cfg || typeof cfg !== "object") return
+    if (cfg.enabled !== undefined) root.stampEnabled = Boolean(cfg.enabled)
+    if (cfg.mode !== undefined) root.currentMode = String(cfg.mode)
+    if (cfg.preset !== undefined) root.currentPreset = String(cfg.preset)
+  }
 
-  FileView {
-    id: configFile
-    path: root.stateFilePath
-    watchChanges: true
-    printErrors: false
-    onFileChanged: reload()
-    onLoaded: {
-      try {
-        var raw = text()
-        if (raw && raw.length <= root.maxConfigBytes && raw.trim().length > 0) {
-          var cfg = JSON.parse(raw)
+  Process {
+    id: configLoader
+    command: ["bash", "-c", "command -v omastamp >/dev/null 2>&1 && exec omastamp get || exec python3 \"$HOME/.config/omarchy/plugins/dorneles.omastamp/scripts/omastamp-ctl.py\" get"]
+    running: false
+    stdout: SplitParser {
+      onRead: function(line) {
+        if (!line || line.length > 65536) return
+        try {
+          var cfg = JSON.parse(line)
           if (cfg && typeof cfg === "object") {
-            if (cfg.enabled !== undefined) root.stampEnabled = Boolean(cfg.enabled)
-            if (cfg.mode !== undefined) root.currentMode = String(cfg.mode)
-            if (cfg.preset !== undefined) root.currentPreset = String(cfg.preset)
+            root.applyConfig(cfg)
           }
+        } catch (e) {
         }
-      } catch (e) {
       }
     }
   }
 
-  function toggleStamp() {
-    root.stampEnabled = !root.stampEnabled
-    try {
-      var raw = configFile.text() || "{}"
-      if (raw.length > root.maxConfigBytes) raw = "{}"
-      var cfg = JSON.parse(raw)
-      if (!cfg || typeof cfg !== "object") cfg = {}
-      cfg.enabled = root.stampEnabled
-      configFile.setText(JSON.stringify(cfg, null, 2) + "\n")
-    } catch (e) {
+  function reloadConfig() {
+    if (!configLoader.running) {
+      configLoader.running = true
     }
   }
 
+  FileView {
+    id: stateDirWatcher
+    path: root.stateDirPath
+    watchChanges: true
+    printErrors: false
+    onFileChanged: root.reloadConfig()
+  }
+
+  Component.onCompleted: root.reloadConfig()
+
+  function toggleStamp() {
+    Util.execDetached("omastamp toggle")
+  }
+
   function cyclePreset() {
-    var presets = ["omarchy", "omarchy-text", "arch", "hyprland", "tux", "cyber-hex", "retro-globe", "arcade-ghost", "terminal", "minimal-star"]
-    var idx = presets.indexOf(root.currentPreset)
-    var next = presets[(idx + 1) % presets.length]
-    root.currentPreset = next
-    root.currentMode = "preset"
-    try {
-      var raw = configFile.text() || "{}"
-      if (raw.length > root.maxConfigBytes) raw = "{}"
-      var cfg = JSON.parse(raw)
-      if (!cfg || typeof cfg !== "object") cfg = {}
-      cfg.mode = "preset"
-      cfg.preset = next
-      configFile.setText(JSON.stringify(cfg, null, 2) + "\n")
-    } catch (e) {
-    }
+    Util.execDetached("omastamp next-preset")
   }
 
   function open() {

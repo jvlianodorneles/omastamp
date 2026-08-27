@@ -7,6 +7,7 @@ Manages desktop logo overlay configuration, presets, typography fonts, and state
 import sys
 import os
 import json
+import stat
 import shutil
 import subprocess
 import argparse
@@ -123,17 +124,32 @@ def render_ascii_art(text: str, font: str) -> str:
 
 def load_config() -> dict:
     STATE_DIR.mkdir(parents=True, exist_ok=True, mode=0o700)
-    if CONFIG_FILE.exists() and not CONFIG_FILE.is_symlink():
-        try:
-            if CONFIG_FILE.stat().st_size <= MAX_CONFIG_SIZE:
-                with open(CONFIG_FILE, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                    if isinstance(data, dict):
-                        merged = dict(DEFAULTS)
-                        merged.update(data)
-                        return merged
-        except Exception:
-            pass
+    fd = None
+    try:
+        flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_CLOEXEC", 0)
+        fd = os.open(CONFIG_FILE, flags)
+        st = os.fstat(fd)
+        if not stat.S_ISREG(st.st_mode) or st.st_size > MAX_CONFIG_SIZE:
+            save_config(DEFAULTS)
+            return dict(DEFAULTS)
+        with open(fd, "r", encoding="utf-8", closefd=False) as f:
+            raw = f.read(MAX_CONFIG_SIZE + 1)
+            if len(raw) > MAX_CONFIG_SIZE:
+                save_config(DEFAULTS)
+                return dict(DEFAULTS)
+            data = json.loads(raw)
+            if isinstance(data, dict):
+                merged = dict(DEFAULTS)
+                merged.update(data)
+                return merged
+    except Exception:
+        pass
+    finally:
+        if fd is not None:
+            try:
+                os.close(fd)
+            except OSError:
+                pass
     save_config(DEFAULTS)
     return dict(DEFAULTS)
 
@@ -354,6 +370,10 @@ def main():
     # reset
     subparsers.add_parser("reset", help="Reset all settings to defaults")
 
+    # apply JSON payload
+    p_apply = subparsers.add_parser("apply-json", help="Merge and apply JSON configuration payload")
+    p_apply.add_argument("payload", help="JSON string or '-' for stdin")
+
     args = parser.parse_args()
 
     if not args.command:
@@ -363,7 +383,31 @@ def main():
     cfg = load_config()
 
     if args.command == "get":
-        print(json.dumps(cfg, indent=2))
+        print(json.dumps(cfg))
+        return
+
+    if args.command == "apply-json":
+        raw_input = args.payload
+        if raw_input == "-":
+            raw_input = sys.stdin.read(MAX_CONFIG_SIZE + 1)
+        if len(raw_input) > MAX_CONFIG_SIZE:
+            print("Error: payload exceeds maximum size", file=sys.stderr)
+            sys.exit(1)
+        try:
+            updates = json.loads(raw_input)
+            if not isinstance(updates, dict):
+                print("Error: JSON payload must be an object", file=sys.stderr)
+                sys.exit(1)
+        except Exception as e:
+            print(f"Error parsing JSON: {e}", file=sys.stderr)
+            sys.exit(1)
+
+        cfg = load_config()
+        for k, v in updates.items():
+            if k in DEFAULTS:
+                cfg[k] = v
+        save_config(cfg)
+        print("✓ Configuration applied successfully")
         return
 
     if args.command in ("browse", "pick"):

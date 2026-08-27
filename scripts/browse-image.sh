@@ -56,21 +56,33 @@ fi
 if [ -n "$CHOSEN" ] && [ -f "$CHOSEN" ]; then
   CHOSEN_PATH=$(realpath "$CHOSEN")
   python3 -c '
-import json, os, sys, tempfile
+import json, os, sys, tempfile, stat
 
 cfg_path = sys.argv[1]
 chosen_path = sys.argv[2]
+max_size = 65536
 
 data = {}
-if os.path.exists(cfg_path) and not os.path.islink(cfg_path):
-    try:
-        if os.path.getsize(cfg_path) <= 65536:
-            with open(cfg_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-                if not isinstance(data, dict):
-                    data = {}
-    except Exception:
-        data = {}
+fd = None
+try:
+    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_CLOEXEC", 0)
+    fd = os.open(cfg_path, flags)
+    st = os.fstat(fd)
+    if stat.S_ISREG(st.st_mode) and st.st_size <= max_size:
+        with open(fd, "r", encoding="utf-8", closefd=False) as f:
+            raw = f.read(max_size + 1)
+            if len(raw) <= max_size:
+                parsed = json.loads(raw)
+                if isinstance(parsed, dict):
+                    data = parsed
+except Exception:
+    data = {}
+finally:
+    if fd is not None:
+        try:
+            os.close(fd)
+        except OSError:
+            pass
 
 data["mode"] = "image"
 data["customImagePath"] = chosen_path

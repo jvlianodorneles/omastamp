@@ -45,8 +45,6 @@ Item {
   property var shell: null
   property var manifest: null
 
-  readonly property string stateFilePath: Quickshell.env("HOME") + "/.local/state/omarchy/omastamp/config.json"
-
   // Resolved color for tinting
   readonly property color resolvedTintColor: {
     if (tintMode === "theme-accent") return Color.accent
@@ -59,46 +57,63 @@ Item {
 
   readonly property bool applyColorization: (mode !== "text") && (tintMode !== "original")
 
-  readonly property int maxConfigBytes: 65536
+  readonly property string stateDirPath: Quickshell.env("HOME") + "/.local/state/omarchy/omastamp"
 
-  // Watch state.json for reactive updates across processes & CLI
-  FileView {
-    id: configFile
-    path: root.stateFilePath
-    watchChanges: true
-    printErrors: false
-    onFileChanged: reload()
-    onLoaded: {
-      try {
-        var raw = text()
-        if (raw && raw.length <= root.maxConfigBytes && raw.trim().length > 0) {
-          var cfg = JSON.parse(raw)
+  function applyConfig(cfg) {
+    if (!cfg || typeof cfg !== "object") return
+    if (cfg.enabled !== undefined) root.stampEnabled = Boolean(cfg.enabled)
+    if (cfg.mode !== undefined) root.mode = String(cfg.mode)
+    if (cfg.preset !== undefined) root.presetId = String(cfg.preset)
+    if (cfg.position !== undefined) root.position = String(cfg.position)
+    if (cfg.size !== undefined) root.stampSize = Number(cfg.size)
+    if (cfg.opacity !== undefined) root.stampOpacity = Number(cfg.opacity)
+    if (cfg.tintMode !== undefined) root.tintMode = String(cfg.tintMode)
+    if (cfg.customColor !== undefined) root.customColor = String(cfg.customColor)
+    if (cfg.offsetX !== undefined) root.offsetX = Number(cfg.offsetX)
+    if (cfg.offsetY !== undefined) root.offsetY = Number(cfg.offsetY)
+    if (cfg.margin !== undefined) root.margin = Number(cfg.margin)
+    if (cfg.rotation !== undefined) root.rotationAngle = Number(cfg.rotation)
+    if (cfg.showShadow !== undefined) root.showShadow = Boolean(cfg.showShadow)
+    if (cfg.customImagePath !== undefined) root.customImagePath = String(cfg.customImagePath)
+    if (cfg.customText !== undefined) root.customText = String(cfg.customText)
+    if (cfg.textFont !== undefined) root.textFont = String(cfg.textFont)
+    if (cfg.renderedAscii !== undefined) root.renderedAscii = String(cfg.renderedAscii)
+    if (cfg.primaryScreenOnly !== undefined) root.primaryScreenOnly = Boolean(cfg.primaryScreenOnly)
+  }
+
+  Process {
+    id: configLoader
+    command: ["bash", "-c", "command -v omastamp >/dev/null 2>&1 && exec omastamp get || exec python3 \"$HOME/.config/omarchy/plugins/dorneles.omastamp/scripts/omastamp-ctl.py\" get"]
+    running: false
+    stdout: SplitParser {
+      onRead: function(line) {
+        if (!line || line.length > 65536) return
+        try {
+          var cfg = JSON.parse(line)
           if (cfg && typeof cfg === "object") {
-            if (cfg.enabled !== undefined) root.stampEnabled = Boolean(cfg.enabled)
-            if (cfg.mode !== undefined) root.mode = String(cfg.mode)
-            if (cfg.preset !== undefined) root.presetId = String(cfg.preset)
-            if (cfg.position !== undefined) root.position = String(cfg.position)
-            if (cfg.size !== undefined) root.stampSize = Number(cfg.size)
-            if (cfg.opacity !== undefined) root.stampOpacity = Number(cfg.opacity)
-            if (cfg.tintMode !== undefined) root.tintMode = String(cfg.tintMode)
-            if (cfg.customColor !== undefined) root.customColor = String(cfg.customColor)
-            if (cfg.offsetX !== undefined) root.offsetX = Number(cfg.offsetX)
-            if (cfg.offsetY !== undefined) root.offsetY = Number(cfg.offsetY)
-            if (cfg.margin !== undefined) root.margin = Number(cfg.margin)
-            if (cfg.rotation !== undefined) root.rotationAngle = Number(cfg.rotation)
-            if (cfg.showShadow !== undefined) root.showShadow = Boolean(cfg.showShadow)
-            if (cfg.customImagePath !== undefined) root.customImagePath = String(cfg.customImagePath)
-            if (cfg.customText !== undefined) root.customText = String(cfg.customText)
-            if (cfg.textFont !== undefined) root.textFont = String(cfg.textFont)
-            if (cfg.renderedAscii !== undefined) root.renderedAscii = String(cfg.renderedAscii)
-            if (cfg.primaryScreenOnly !== undefined) root.primaryScreenOnly = Boolean(cfg.primaryScreenOnly)
+            root.applyConfig(cfg)
           }
+        } catch (e) {
         }
-      } catch (e) {
-        console.warn("OmaStamp: error parsing config.json:", e)
       }
     }
   }
+
+  function reloadConfig() {
+    if (!configLoader.running) {
+      configLoader.running = true
+    }
+  }
+
+  FileView {
+    id: stateDirWatcher
+    path: root.stateDirPath
+    watchChanges: true
+    printErrors: false
+    onFileChanged: root.reloadConfig()
+  }
+
+  Component.onCompleted: root.reloadConfig()
 
   // -------------------------------------------------------------
   // Helpers
@@ -124,12 +139,11 @@ Item {
       "renderedAscii": root.renderedAscii,
       "primaryScreenOnly": root.primaryScreenOnly
     }
-    configFile.setText(JSON.stringify(payload, null, 2) + "\n")
+    Util.execDetached("omastamp apply-json " + Util.shellQuote(JSON.stringify(payload)))
   }
 
   function toggle() {
-    root.stampEnabled = !root.stampEnabled
-    saveState()
+    Util.execDetached("omastamp toggle")
   }
 
   function setEnabled(val) {
@@ -198,7 +212,7 @@ Item {
     }
 
     function refresh(): void {
-      configFile.reload()
+      root.reloadConfig()
     }
   }
 
